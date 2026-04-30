@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 class AppFonts {
   // Central font configuration
   // Just change these strings to change the font throughout the app
-  static const String headingFont = 'Inter';
-  static const String mainFont = 'Inter';
-  static const String secondaryFont = 'Inter';
+  static const String headingFont = 'Roboto';
+  static const String mainFont = 'Roboto';
+  static const String secondaryFont = 'Roboto';
 
   // Helper method to get the heading font style
   static TextStyle heading({

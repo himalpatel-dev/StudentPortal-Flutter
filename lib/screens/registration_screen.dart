@@ -394,9 +394,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          bottom: true,
+          top: false,
+          child: Column(
         children: [
           _buildHeader(),
           _buildCustomStepper(),
@@ -879,6 +884,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           ),
           _buildModernFooter(),
         ],
+      ),
+      ),
       ),
     );
   }

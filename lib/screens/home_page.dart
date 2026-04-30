@@ -85,8 +85,16 @@ class _HomePageState extends State<HomePage> {
         currentIndex: _selectedNavIndex,
         onTap: (index) => setState(() => _selectedNavIndex = index),
         backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primaryAccent,
-        unselectedItemColor: Colors.grey[400],
+        selectedItemColor: AppColors.deepAccent,
+        unselectedItemColor: AppColors.textGrey,
+        selectedLabelStyle: AppFonts.main(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+        ),
+        unselectedLabelStyle: AppFonts.main(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         items: const [
@@ -143,19 +151,16 @@ class _HomePageState extends State<HomePage> {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.black,
-            AppColors.darkBlueGradient,
-            AppColors.deepAccent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.topCenter,
+          colors: [AppColors.darkBg, AppColors.deepAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
       ),
       child: Stack(
         children: [
           // Custom Drawn Pattern Lines
-          Positioned.fill(child: CustomPaint(painter: HeaderPatternPainter())),
+          //  Positioned.fill(child: CustomPaint(painter: HeaderPatternPainter())),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 75, 24, 20),
             child: Column(
@@ -244,26 +249,28 @@ class _HomePageState extends State<HomePage> {
                                 Icons.numbers,
                                 fontSize: 11,
                               ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                              if (student.clubAffiliation.isNotEmpty) ...[
+                                Container(
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  height: 4,
+                                  width: 4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.0),
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
-                                height: 4,
-                                width: 4,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.0),
-                                  shape: BoxShape.circle,
+                                Container(
+                                  child: _buildSmallBadge(
+                                    student.clubAffiliation,
+                                    AppColors.primaryAccent.withOpacity(0.1),
+                                    AppColors.textPrimary,
+                                    Icons.school,
+                                    fontSize: 11,
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                child: _buildSmallBadge(
-                                  student.clubAffiliation,
-                                  AppColors.primaryAccent.withOpacity(0.1),
-                                  AppColors.textPrimary,
-                                  Icons.school,
-                                  fontSize: 11,
-                                ),
-                              ),
+                              ],
                             ],
                           ),
                         ],
@@ -281,13 +288,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildStatsRow(StudentStats stats) {
-    const primaryStatColor = AppColors.primaryAccent;
+    const primaryStatColor = AppColors.deepAccent;
 
     return Row(
       children: [
         _buildStatCard(
           'Tournaments',
-          100.toString(),
+          stats.totalTournamentsPlayed.toString(),
           Icons.emoji_events_rounded,
           primaryStatColor,
         ),
@@ -421,7 +428,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(40),
                   child: Text(
                     'No tournaments found',
-                    style: AppFonts.main(color: Colors.grey),
+                    style: AppFonts.main(color: AppColors.textSecondary),
                   ),
                 ),
               ),
@@ -438,7 +445,7 @@ class _HomePageState extends State<HomePage> {
           width: 4,
           height: 18,
           decoration: BoxDecoration(
-            color: AppColors.primaryAccent,
+            color: AppColors.secondaryAccent,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -446,10 +453,10 @@ class _HomePageState extends State<HomePage> {
         Text(
           title,
           style: AppFonts.heading(
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: FontWeight.w900,
-            color: const Color(0xFF1E293B),
-            letterSpacing: 0.5,
+            color: AppColors.textGrey.withOpacity(0.8),
+            letterSpacing: 1,
           ),
         ),
       ],
@@ -473,9 +480,9 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -487,24 +494,20 @@ class _HomePageState extends State<HomePage> {
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               gradient: LinearGradient(
-                colors: [
-                  Colors.black,
-                  AppColors.darkBlueGradient,
-                  AppColors.deepAccent,
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.topCenter,
+                colors: [AppColors.darkBg, AppColors.deepAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
             child: Stack(
               children: [
                 // Pattern Background
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.1,
-                    child: CustomPaint(painter: CardLinesPainter()),
-                  ),
-                ),
+                // Positioned.fill(
+                //   child: Opacity(
+                //     opacity: 0.1,
+                //     child: CustomPaint(painter: CardLinesPainter()),
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.all(18),
                   child: Column(
@@ -525,21 +528,15 @@ class _HomePageState extends State<HomePage> {
                                     _buildSmallBadge(
                                       tournament.tournamentTypeName
                                           .toUpperCase(),
-                                      AppColors.primaryAccent.withOpacity(0.1),
-                                      AppColors.textPrimary,
-                                      Icons.shield_rounded,
-                                    ),
-                                    if (isMyTournament) ...[
-                                      const SizedBox(width: 8),
-                                      _buildSmallBadge(
-                                        'REGISTERED',
-                                        AppColors.primaryAccent.withOpacity(
-                                          0.1,
-                                        ),
-                                        AppColors.textPrimary,
-                                        Icons.check_circle_rounded,
+                                      AppColors.secondaryAccent.withOpacity(
+                                        0.2,
                                       ),
-                                    ],
+                                      AppColors.textPrimary,
+                                      Icons.track_changes_rounded,
+                                      borderColor: Colors.white.withOpacity(
+                                        0.15,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 14),
@@ -548,7 +545,7 @@ class _HomePageState extends State<HomePage> {
                                   style: AppFonts.heading(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w900,
-                                    color: Colors.white,
+                                    color: AppColors.textPrimary,
                                     height: 1.1,
                                   ),
                                   maxLines: 2,
@@ -571,7 +568,7 @@ class _HomePageState extends State<HomePage> {
                                         style: AppFonts.main(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white.withOpacity(0.6),
+                                          color: AppColors.textSecondary,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -601,7 +598,7 @@ class _HomePageState extends State<HomePage> {
                                 style: AppFonts.main(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -613,8 +610,11 @@ class _HomePageState extends State<HomePage> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
+                              color: Colors.white.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.1),
+                              ),
                             ),
                             child: Text(
                               '$daysLeft DAYS',
@@ -631,33 +631,49 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+                // Top Right Status Badge
+                if (tournament.tournamentStatus.isNotEmpty)
+                  Positioned(
+                    top: 18,
+                    right: 18,
+                    child: _buildStatusChip(tournament.tournamentStatus),
+                  ),
               ],
             ),
           ),
-          // Bottom Part: Category & Actions
-          Padding(
-            padding: const EdgeInsets.all(10),
+          // Bottom Part: Category & Action
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(24),
+              ),
+              border: Border.all(color: AppColors.darkBg.withOpacity(0.05)),
+            ),
             child: Row(
               children: [
-                // Category Pill (Left)
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
+                      horizontal: 12,
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: AppColors.darkBg.withOpacity(0.03),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.darkBg.withOpacity(0.05),
+                      ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.track_changes_rounded,
-                          color: AppColors.primaryAccent.withOpacity(0.6),
+                          color: AppColors.textGrey,
                           size: 16,
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -668,10 +684,10 @@ class _HomePageState extends State<HomePage> {
                                     ? 'CATEGORY'
                                     : 'SUGGESTED CATEGORY',
                                 style: AppFonts.main(
-                                  fontSize: 7,
+                                  fontSize: 8,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.black38,
-                                  letterSpacing: 1,
+                                  color: AppColors.textGrey,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                               Builder(
@@ -686,27 +702,24 @@ class _HomePageState extends State<HomePage> {
                                             ? tournament.suggestedCategory
                                             : 'Not Calculated');
                                   return Tooltip(
-                                    message: categoryName,
+                                    message: categoryName.toUpperCase(),
                                     triggerMode: TooltipTriggerMode.tap,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
+                                    preferBelow: false,
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.85),
+                                      color: AppColors.deepAccent,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     textStyle: AppFonts.main(
                                       color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                     child: Text(
-                                      categoryName,
+                                      categoryName.toUpperCase(),
                                       style: AppFonts.heading(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.black,
+                                        color: AppColors.textDark,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -740,13 +753,542 @@ class _HomePageState extends State<HomePage> {
                               ),
                             );
                           }
-                        : () {},
+                        : () async {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+
+                            final provider = Provider.of<TournamentProvider>(
+                              context,
+                              listen: false,
+                            );
+                            final matchResult = await provider
+                                .findMatchingCategory(
+                                  tournament.tournamentId,
+                                  student,
+                                  tournament,
+                                );
+
+                            if (context.mounted) {
+                              Navigator.pop(context); // Close loading dialog
+                              if (matchResult != null) {
+                                final matchedCategory = matchResult['match'];
+                                final allCategories =
+                                    matchResult['categories']
+                                        as List<dynamic>? ??
+                                    [];
+                                _showApplyBottomSheet(
+                                  context,
+                                  tournament,
+                                  student,
+                                  matchedCategory,
+                                  allCategories,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Failed to load categories.'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showApplyBottomSheet(
+    BuildContext context,
+    Tournament tournament,
+    Student student,
+    Map<String, dynamic>? matchedCategory,
+    List<dynamic> allCategories,
+  ) {
+    int? selectedCategoryId = matchedCategory?['category_division_id'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Top Dark Section
+                  Container(
+                    padding: const EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 12,
+                      bottom: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(25),
+                      ),
+                      gradient: LinearGradient(
+                        colors: [AppColors.darkBg, AppColors.deepAccent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Handle and Close Button Row
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white24,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Tournament Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: const Icon(
+                                  Icons.emoji_events_rounded,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'TOURNAMENT',
+                                      style: AppFonts.main(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.secondaryAccent,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      tournament.tournamentName.toUpperCase(),
+                                      style: AppFonts.heading(
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        height: 1.1,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Bottom White Section
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 24,
+                      right: 24,
+                      top: 24,
+                      bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Stats Row
+                        Row(
+                          children: [
+                            _buildBottomSheetStatBox(
+                              'HEIGHT',
+                              student.height,
+                              'CM',
+                              Icons.straighten,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildBottomSheetStatBox(
+                              'WEIGHT',
+                              student.weight,
+                              'KG',
+                              Icons.monitor_weight_outlined,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildBottomSheetStatBox(
+                              'PI INDEX',
+                              student.physicalIndex,
+                              '',
+                              Icons.tag,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Category Dropdown
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.my_location_rounded,
+                              color: AppColors.primaryAccent,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'SELECT CATEGORY',
+                              style: AppFonts.main(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.black54,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.darkBg.withOpacity(0.03),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.darkBg.withOpacity(0.08),
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int>(
+                              isExpanded: true,
+                              dropdownColor: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              elevation: 8,
+                              value: selectedCategoryId,
+                              hint: Text(
+                                'Choose Category',
+                                style: AppFonts.main(
+                                  color: AppColors.textGrey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              icon: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondaryAccent.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: AppColors.secondaryAccent,
+                                  size: 20,
+                                ),
+                              ),
+                              items: allCategories.map<DropdownMenuItem<int>>((
+                                cat,
+                              ) {
+                                final bool isSelected = cat['category_division_id'] == selectedCategoryId;
+                                return DropdownMenuItem<int>(
+                                  value: cat['category_division_id'],
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isSelected 
+                                          ? AppColors.secondaryAccent.withOpacity(0.08) 
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        if (isSelected)
+                                          Container(
+                                            width: 4,
+                                            height: 16,
+                                            margin: const EdgeInsets.only(right: 10),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.secondaryAccent,
+                                              borderRadius: BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                        Expanded(
+                                          child: Text(
+                                            cat['category_division_name']?.toString() ?? '',
+                                            style: AppFonts.heading(
+                                              fontSize: 14,
+                                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                                              color: isSelected ? AppColors.secondaryAccent : AppColors.textDark,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          const Icon(
+                                            Icons.check_circle_rounded,
+                                            color: AppColors.secondaryAccent,
+                                            size: 16,
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (int? newValue) {
+                                setState(() {
+                                  selectedCategoryId = newValue;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Apply Button
+                        Container(
+                          width: double.infinity,
+                          height: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: const LinearGradient(
+                              colors: [AppColors.darkBg, AppColors.deepAccent],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: selectedCategoryId == null
+                                ? null
+                                : () {
+                                    Navigator.pop(context);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Application request pending API implementation',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.verified_user_outlined,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'CONFIRM APPLICATION',
+                                  style: AppFonts.main(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Disclaimer text
+                        Center(
+                          child: Text(
+                            'BY CONFIRMING YOU AGREE TO TOURNAMENT RULES',
+                            style: AppFonts.main(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.grey[500],
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomSheetStatBox(
+    String label,
+    String value,
+    String unit,
+    IconData icon,
+  ) {
+    return Expanded(
+      child: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.fieldBorder, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              // Subtle blue glow in bottom right
+              Positioned(
+                right: -12,
+                bottom: -12,
+                child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primaryAccent.withOpacity(0.08),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(icon, color: AppColors.primaryAccent, size: 10),
+                        const SizedBox(width: 4),
+                        Text(
+                          label,
+                          style: AppFonts.main(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.grey[600],
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          value.isEmpty || value == '0' || value == '0.0'
+                              ? 'N/A'
+                              : value,
+                          style: AppFonts.heading(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        if (unit.isNotEmpty &&
+                            value.isNotEmpty &&
+                            value != '0' &&
+                            value != '0.0') ...[
+                          const SizedBox(width: 2),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: Text(
+                              unit,
+                              style: AppFonts.main(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -801,7 +1343,7 @@ class _HomePageState extends State<HomePage> {
             style: AppFonts.main(
               fontSize: 8,
               fontWeight: FontWeight.w800,
-              color: Colors.white38,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -815,6 +1357,7 @@ class _HomePageState extends State<HomePage> {
     Color textColor,
     IconData icon, {
     double fontSize = 8,
+    Color? borderColor,
   }) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -824,7 +1367,7 @@ class _HomePageState extends State<HomePage> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(fontSize),
-        border: Border.all(color: textColor.withOpacity(0.1)),
+        border: Border.all(color: borderColor ?? textColor.withOpacity(0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -854,14 +1397,14 @@ class _HomePageState extends State<HomePage> {
       height: 38,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.primaryAccent, AppColors.deepAccent],
+          colors: [AppColors.darkBg, AppColors.deepAccent],
         ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryAccent.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -869,7 +1412,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(30),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1119,6 +1662,64 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       return dateStr;
     }
+  }
+
+  Widget _buildStatusChip(String status) {
+    Color baseColor;
+    IconData icon;
+
+    switch (status.toLowerCase()) {
+      case 'scheduled':
+      case 'upcoming':
+        baseColor = AppColors.secondaryAccent; // Mauve Grey from image
+        icon = Icons.calendar_today_rounded;
+        break;
+      case 'in_progress':
+      case 'live':
+      case 'ongoing':
+        baseColor = AppColors.secondaryAccent; // Mauve Grey from image
+        icon = Icons.play_circle_fill_rounded;
+        break;
+      case 'cancelled':
+        baseColor = AppColors.deepAccent;
+        icon = Icons.cancel_rounded;
+        break;
+      case 'completed':
+      case 'closed':
+      case 'open':
+      case 'active':
+        baseColor = AppColors.primaryAccent;
+        icon = Icons.check_circle_rounded;
+        break;
+      default:
+        baseColor = AppColors.textSecondary;
+        icon = Icons.info_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+      decoration: BoxDecoration(
+        color: baseColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            status.toUpperCase(),
+            style: AppFonts.main(
+              fontSize: 8,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:student_portal/models/fixture.dart';
 import 'package:student_portal/models/student.dart';
 import 'package:student_portal/models/tournament.dart';
@@ -23,6 +24,8 @@ class FixtureDetailsScreen extends StatefulWidget {
 }
 
 class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
+  final Set<int> _expandedMatchIds = {};
+
   @override
   void initState() {
     super.initState();
@@ -38,34 +41,126 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Consumer<TournamentProvider>(
-              builder: (context, provider, child) {
-                if (provider.isFixtureLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: Consumer<TournamentProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isFixtureLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (provider.fixtureDetails.isEmpty) {
-                  return _buildEmptyState();
-                }
+                  if (provider.fixtureDetails.isEmpty) {
+                    return _buildEmptyState();
+                  }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: provider.fixtureDetails.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == provider.fixtureDetails.length) {
-                      return _buildInstructionCard();
+                  final sortedFixtures = List.from(provider.fixtureDetails);
+                  sortedFixtures.sort((a, b) {
+                    if (a.matchStatus.toLowerCase() == 'scheduled' &&
+                        b.matchStatus.toLowerCase() != 'scheduled') {
+                      return -1;
                     }
-                    return _buildFixtureCard(provider.fixtureDetails[index]);
-                  },
-                );
-              },
+                    if (a.matchStatus.toLowerCase() != 'scheduled' &&
+                        b.matchStatus.toLowerCase() == 'scheduled') {
+                      return 1;
+                    }
+                    return 0;
+                  });
+
+                  final scheduled = sortedFixtures
+                      .where((f) => f.matchStatus.toLowerCase() == 'scheduled')
+                      .toList();
+                  final completed = sortedFixtures
+                      .where((f) => f.matchStatus.toLowerCase() != 'scheduled')
+                      .toList();
+
+                  int itemCount = 1 + scheduled.length;
+                  if (completed.isNotEmpty) {
+                    itemCount += 1 + completed.length;
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: _buildInstructionCard(),
+                        );
+                      }
+
+                      // Scheduled Matches
+                      if (index <= scheduled.length) {
+                        return _buildFixtureCard(
+                          scheduled[index - 1],
+                          isExpanded: true,
+                          onToggle: () {},
+                        );
+                      }
+
+                      // Completed Section Header
+                      int completedHeaderIndex = scheduled.length + 1;
+                      if (index == completedHeaderIndex) {
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            top: 10,
+                            bottom: 20,
+                            left: 4,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondaryAccent,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'COMPLETED MATCHES',
+                                style: AppFonts.main(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.textDark,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // Completed Matches
+                      int completedMatchIndex =
+                          index - completedHeaderIndex - 1;
+                      final fixture = completed[completedMatchIndex];
+                      return _buildFixtureCard(
+                        fixture,
+                        isExpanded: _expandedMatchIds.contains(fixture.matchId),
+                        onToggle: () {
+                          setState(() {
+                            if (_expandedMatchIds.contains(fixture.matchId)) {
+                              _expandedMatchIds.remove(fixture.matchId);
+                            } else {
+                              _expandedMatchIds.add(fixture.matchId);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -75,14 +170,11 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.black,
-            AppColors.darkBlueGradient,
-            AppColors.deepAccent,
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.topCenter,
+          colors: [AppColors.darkBg, AppColors.deepAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: SafeArea(
         bottom: false,
@@ -108,6 +200,67 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
                         size: 20,
                       ),
                     ),
+                  ),
+                  Consumer<TournamentProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.participantSlipUrl == null ||
+                          provider.participantSlipUrl!.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return GestureDetector(
+                        onTap: () async {
+                          final Uri url = Uri.parse(
+                            provider.participantSlipUrl!,
+                          );
+                          if (!await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Could not open participant slip',
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.download_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'SLIP',
+                                style: AppFonts.main(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -142,97 +295,6 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
                   height: 1.1,
                 ),
               ),
-              const SizedBox(height: 24),
-              // Player Info Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.1)),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: AppColors.primaryAccent,
-                      backgroundImage:
-                          widget.student.studentProfileImage.isNotEmpty
-                          ? NetworkImage(widget.student.studentProfileImage)
-                          : null,
-                      child: widget.student.studentProfileImage.isEmpty
-                          ? Text(
-                              widget.student.firstName[0],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.student.fullName,
-                            style: AppFonts.heading(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.shield_outlined,
-                                size: 12,
-                                color: const Color.fromARGB(213, 255, 255, 255),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                widget.student.clubAffiliation,
-                                style: AppFonts.main(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color.fromARGB(
-                                    213,
-                                    255,
-                                    255,
-                                    255,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                        ),
-                      ),
-                      child: Text(
-                        widget.student.uuid,
-                        style: AppFonts.main(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -252,202 +314,252 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
     );
   }
 
-  Widget _buildFixtureCard(Fixture fixture) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.black26, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+  Widget _buildFixtureCard(
+    Fixture fixture, {
+    required bool isExpanded,
+    required VoidCallback onToggle,
+  }) {
+    final bool isCompleted = fixture.matchStatus.toLowerCase() == 'completed';
+
+    return GestureDetector(
+      onTap: onToggle,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: isCompleted ? Colors.black12 : Colors.black26,
+            width: 1,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                _buildCardDateBlock(fixture.matchDate),
-                const SizedBox(width: 20),
-                Container(width: 1, height: 80, color: Colors.black26),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  _buildCardDateBlock(fixture.matchDate),
+                  const SizedBox(width: 20),
+                  Container(
+                    width: 1,
+                    height: 80,
+                    color: isCompleted ? Colors.black12 : Colors.black26,
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'ROUND ${fixture.roundNo}',
+                              style: AppFonts.main(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.black38,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            _buildStatusBadge(fixture.matchStatus),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          fixture.matchName,
+                          style: AppFonts.heading(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '#',
+                                  style: AppFonts.main(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.secondaryAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'MATCH ID ${fixture.matchId}',
+                                  style: AppFonts.main(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.textGrey,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (isCompleted)
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up_rounded
+                                    : Icons.keyboard_arrow_down_rounded,
+                                color: Colors.black26,
+                                size: 20,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isExpanded) ...[
+              Divider(
+                height: 1,
+                color: isCompleted ? Colors.black12 : Colors.black26,
+              ),
+              // Category
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryAccent.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.track_changes_rounded,
+                        color: AppColors.secondaryAccent,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ROUND ${fixture.roundNo}',
+                            'CATEGORY',
                             style: AppFonts.main(
-                              fontSize: 10,
+                              fontSize: 8,
                               fontWeight: FontWeight.w900,
-                              color: Colors.black38,
+                              color: AppColors.secondaryAccent,
                               letterSpacing: 1,
                             ),
                           ),
-                          _buildStatusBadge(fixture.matchStatus),
+                          Text(
+                            fixture.categoryName,
+                            style: AppFonts.heading(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        fixture.matchName,
-                        style: AppFonts.heading(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black,
-                        ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isCompleted ? Colors.black12 : Colors.black26,
+              ),
+              // Ring, Pool, Report Grid
+              IntrinsicHeight(
+                child: Row(
+                  children: [
+                    _buildGridItem(
+                      Icons.flag_rounded,
+                      'RING',
+                      '#${fixture.ringNo}',
+                    ),
+                    VerticalDivider(
+                      width: 1,
+                      color: isCompleted ? Colors.black12 : Colors.black26,
+                    ),
+                    _buildGridItem(
+                      Icons.layers_rounded,
+                      'POOL',
+                      fixture.poolNo,
+                    ),
+                    VerticalDivider(
+                      width: 1,
+                      color: isCompleted ? Colors.black12 : Colors.black26,
+                    ),
+                    _buildGridItem(
+                      Icons.access_time_rounded,
+                      'REPORT',
+                      fixture.reportingTime,
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isCompleted ? Colors.black12 : Colors.black26,
+              ),
+              // Reporting Window
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
+                      child: Icon(
+                        Icons.whatshot_rounded,
+                        color: Colors.red.withOpacity(0.6),
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '#',
+                            'REPORTING WINDOW',
                             style: AppFonts.main(
-                              fontSize: 12,
+                              fontSize: 8,
                               fontWeight: FontWeight.w900,
-                              color: AppColors.primaryAccent,
+                              color: AppColors.secondaryAccent,
+                              letterSpacing: 1,
                             ),
                           ),
-                          const SizedBox(width: 4),
                           Text(
-                            'MATCH ID ${fixture.matchId}',
-                            style: AppFonts.main(
-                              fontSize: 11,
+                            '${fixture.matchDate} · ${fixture.reportingTime}',
+                            style: AppFonts.heading(
+                              fontSize: 14,
                               fontWeight: FontWeight.w900,
-                              color: Colors.black54,
-                              letterSpacing: 0.5,
+                              color: Colors.black,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: Colors.black26),
-          // Category
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryAccent.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.track_changes_rounded,
-                    color: AppColors.primaryAccent,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'CATEGORY',
-                        style: AppFonts.main(
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black26,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      Text(
-                        fixture.categoryName,
-                        style: AppFonts.heading(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: Colors.black26),
-          // Ring, Pool, Report Grid
-          IntrinsicHeight(
-            child: Row(
-              children: [
-                _buildGridItem(
-                  Icons.flag_rounded,
-                  'RING',
-                  '#${fixture.ringNo}',
-                ),
-                VerticalDivider(width: 1, color: Colors.black26),
-                _buildGridItem(Icons.layers_rounded, 'POOL', fixture.poolNo),
-                VerticalDivider(width: 1, color: Colors.black26),
-                _buildGridItem(
-                  Icons.access_time_rounded,
-                  'REPORT',
-                  fixture.reportingTime,
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: Colors.black26),
-          // Reporting Window
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.whatshot_rounded,
-                    color: Colors.red.withOpacity(0.6),
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'REPORTING WINDOW',
-                        style: AppFonts.main(
-                          fontSize: 8,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black26,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      Text(
-                        '${fixture.matchDate} · ${fixture.reportingTime}',
-                        style: AppFonts.heading(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -463,7 +575,7 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
             style: AppFonts.main(
               fontSize: 9,
               fontWeight: FontWeight.w900,
-              color: AppColors.primaryAccent,
+              color: AppColors.secondaryAccent,
               letterSpacing: 1,
             ),
           ),
@@ -481,7 +593,7 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
             style: AppFonts.main(
               fontSize: 8,
               fontWeight: FontWeight.w800,
-              color: Colors.black26,
+              color: AppColors.secondaryAccent,
             ),
           ),
         ],
@@ -534,14 +646,14 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 12, color: Colors.black26),
+                Icon(icon, size: 12, color: AppColors.secondaryAccent),
                 const SizedBox(width: 6),
                 Text(
                   label,
                   style: AppFonts.main(
                     fontSize: 8,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black26,
+                    color: AppColors.secondaryAccent,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -564,59 +676,45 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
 
   Widget _buildInstructionCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black26),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.red.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withOpacity(0.1)),
       ),
-      child: Column(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.05),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.notifications_active_rounded,
-                  color: Colors.red.withOpacity(0.6),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  'Be at the ring 10 min before reporting time',
-                  style: AppFonts.heading(
-                    fontSize: 14,
+          Icon(
+            Icons.info_outline_rounded,
+            color: Colors.red.withOpacity(0.7),
+            size: 18,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'IMPORTANT NOTICE',
+                  style: AppFonts.main(
+                    fontSize: 9,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black,
+                    color: Colors.red.withOpacity(0.8),
+                    letterSpacing: 1,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.only(left: 46),
-            child: Text(
-              'Carry your ID card and a copy of the fixture. Late reporting may result in disqualification per tournament rules.',
-              style: AppFonts.main(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.black45,
-                height: 1.5,
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Arrive 10m early with ID & fixture copy. Late entry may lead to disqualification.',
+                  style: AppFonts.main(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDark,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -628,7 +726,7 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
     return Center(
       child: Text(
         'No fixtures found',
-        style: AppFonts.main(color: Colors.grey),
+        style: AppFonts.main(color: AppColors.textSecondary),
       ),
     );
   }

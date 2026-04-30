@@ -11,6 +11,7 @@ class Tournament {
   final String completeAddress;
   final String categoryDivisionName;
   final String suggestedCategory;
+  final String ageCutoffDate;
 
   Tournament({
     required this.tournamentId,
@@ -25,6 +26,7 @@ class Tournament {
     required this.completeAddress,
     required this.categoryDivisionName,
     this.suggestedCategory = '',
+    this.ageCutoffDate = '',
   });
 
   factory Tournament.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class Tournament {
       completeAddress: json['complete_address'] ?? '',
       categoryDivisionName: json['category_division_name'] ?? '',
       suggestedCategory: json['suggested_category'] ?? '',
+      ageCutoffDate: json['age_cutoff_date'] ?? '',
     );
   }
 }

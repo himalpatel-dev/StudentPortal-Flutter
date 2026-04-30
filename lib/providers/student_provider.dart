@@ -157,7 +157,9 @@ class StudentProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> createStudent(Map<String, dynamic> studentData) async {
+  Future<Map<String, dynamic>?> createStudent(
+    Map<String, dynamic> studentData,
+  ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -226,8 +228,13 @@ class StudentProvider extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final studentId = prefs.getString('studentId') ?? '124';
 
+      final token = prefs.getString('authToken');
       final response = await http.get(
         Uri.parse('${ApiConstants.kudoUrl}/api/students/get-stats/$studentId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response.statusCode == 200) {

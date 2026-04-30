@@ -63,7 +63,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                 'ATHLETE  ·  IDENTITY',
                 style: AppFonts.main(
                   fontSize: 11,
-                  color: AppColors.primaryAccent,
+                  color: AppColors.deepAccent,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2.5,
                 ),
@@ -122,14 +122,14 @@ class _AthleteIdCardState extends State<AthleteIdCard>
       height: 620,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
-        gradient: LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E40AF)],
-          begin: Alignment.centerLeft,
-          end: Alignment.topCenter,
+        gradient: const LinearGradient(
+          colors: [AppColors.darkBg, AppColors.deepAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: AppColors.darkBg.withOpacity(0.4),
             blurRadius: 30,
             offset: const Offset(0, 15),
           ),
@@ -138,16 +138,8 @@ class _AthleteIdCardState extends State<AthleteIdCard>
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Pattern Overlay
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: Opacity(
-                opacity: 0.06,
-                child: CustomPaint(painter: CardPatternPainter()),
-              ),
-            ),
-          ),
+          // Removed pattern for a cleaner solid look
+          const SizedBox.shrink(),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 30, 24, 0),
             child: Column(
@@ -160,7 +152,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                       'IDENTITY CARD',
                       style: AppFonts.heading(
                         fontSize: 16,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2,
                       ),
@@ -203,7 +195,9 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                                   widget.student.firstName[0].toUpperCase(),
                                   style: AppFonts.heading(
                                     fontSize: 80,
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: AppColors.textPrimary.withOpacity(
+                                      0.1,
+                                    ),
                                     fontWeight: FontWeight.w900,
                                   ),
                                 ),
@@ -219,7 +213,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                   textAlign: TextAlign.center,
                   style: AppFonts.heading(
                     fontSize: 28,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
                   ),
@@ -282,7 +276,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                     '',
                     style: AppFonts.main(
                       fontSize: 10,
-                      color: Colors.white.withOpacity(0.4),
+                      color: AppColors.textPrimary.withOpacity(0.4),
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.0,
                     ),
@@ -302,7 +296,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
       width: double.infinity,
       height: 670,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
@@ -319,7 +313,9 @@ class _AthleteIdCardState extends State<AthleteIdCard>
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF0F172A), Color(0xFF1E40AF)],
+                colors: [AppColors.darkBg, AppColors.deepAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
             ),
@@ -344,14 +340,14 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: AppColors.textPrimary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         'GJ${widget.student.id.toString().padLeft(3, '0')}',
                         style: AppFonts.main(
                           fontSize: 10,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -363,7 +359,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                   widget.student.fullName.toUpperCase(),
                   style: AppFonts.heading(
                     fontSize: 22,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -497,7 +493,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: const BoxDecoration(
-              color: Color(0xFFF8FAFC),
+              color: AppColors.surfaceDark,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
             ),
             child: Center(
@@ -570,9 +566,9 @@ class _AthleteIdCardState extends State<AthleteIdCard>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: AppColors.textPrimary.withOpacity(0.05),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: AppColors.textPrimary.withOpacity(0.08)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,9 +577,9 @@ class _AthleteIdCardState extends State<AthleteIdCard>
               label,
               style: AppFonts.main(
                 fontSize: 8,
-                color: Colors.white.withOpacity(0.4),
+                color: AppColors.textSecondary.withOpacity(0.6),
                 fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 4),
@@ -591,7 +587,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
               value,
               style: AppFonts.heading(
                 fontSize: 14,
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w900,
               ),
               maxLines: 1,
@@ -604,6 +600,9 @@ class _AthleteIdCardState extends State<AthleteIdCard>
   }
 
   Widget _buildDataSection(String title, List<Widget> items) {
+    final validItems = items.where((item) => item is! SizedBox).toList();
+    if (validItems.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -615,7 +614,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
               title,
               style: AppFonts.main(
                 fontSize: 12,
-                color: const Color(0xFF64748B),
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
@@ -627,24 +626,27 @@ class _AthleteIdCardState extends State<AthleteIdCard>
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: AppColors.surfaceDark),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: AppColors.textPrimary.withOpacity(0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Column(children: items),
+          child: Column(children: validItems),
         ),
       ],
     );
   }
 
   Widget _buildDataItem(IconData icon, String label, String value) {
+    if (value.trim().isEmpty || value.trim().toLowerCase() == 'null') {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -655,7 +657,11 @@ class _AthleteIdCardState extends State<AthleteIdCard>
               color: AppColors.primaryAccent.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: AppColors.primaryAccent, size: 20),
+            child: Icon(
+              icon,
+              color: AppColors.deepAccent.withOpacity(0.8),
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -666,15 +672,16 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                   label,
                   style: AppFonts.main(
                     fontSize: 10,
-                    color: const Color(0xFF94A3B8),
+                    color: AppColors.textGrey.withOpacity(0.8),
                     fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 Text(
                   value,
                   style: AppFonts.heading(
                     fontSize: 16,
-                    color: const Color(0xFF1E293B),
+                    color: AppColors.textDark,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -691,7 +698,7 @@ class CardPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.15)
+      ..color = AppColors.textPrimary.withOpacity(0.15)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 

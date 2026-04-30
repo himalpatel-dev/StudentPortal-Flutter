@@ -56,11 +56,14 @@ class _OtpScreenState extends State<OtpScreen> {
       ),
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.darkBg,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.darkBg,
+        body: SingleChildScrollView(
+          child: Container(
+            width: double.infinity,
+            height: size.height,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -184,12 +187,14 @@ class _OtpScreenState extends State<OtpScreen> {
                     topRight: Radius.circular(45),
                   ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24 * scaleFactor,
-                    vertical: 30 * scaleFactor,
-                  ),
-                  child: Column(
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24 * scaleFactor,
+                      vertical: 30 * scaleFactor,
+                    ),
+                    child: Column(
                     children: [
                       Row(
                         children: [
@@ -443,11 +448,14 @@ class _OtpScreenState extends State<OtpScreen> {
                     ],
                   ),
                 ),
+                ),
               ),
             ),
           ],
         ),
       ),
+      ),
+    ),
     );
   }
 }

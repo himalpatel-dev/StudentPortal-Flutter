@@ -19,7 +19,7 @@ class ProfileTab extends StatelessWidget {
     final double scaleFactor = (screenWidth / 375.0).clamp(0.8, 1.2);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
+      backgroundColor: const Color(0xFFF8FAFC),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -200,14 +200,11 @@ class ProfileTab extends StatelessWidget {
           height: 380 * scaleFactor,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.black,
-                AppColors.darkBlueGradient,
-                AppColors.deepAccent,
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.topCenter,
+              colors: [AppColors.darkBg, AppColors.deepAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
           ),
           child: SafeArea(
             bottom: false,
@@ -239,7 +236,7 @@ class ProfileTab extends StatelessWidget {
                           Text(
                             'ATHLETE PROFILE',
                             style: AppFonts.main(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1.5,
@@ -264,12 +261,12 @@ class ProfileTab extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: AppColors.textPrimary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.logout_rounded,
-                            color: Colors.white60,
+                            color: AppColors.textPrimary.withOpacity(0.6),
                             size: 20,
                           ),
                         ),
@@ -303,16 +300,16 @@ class ProfileTab extends StatelessWidget {
                                   student.studentProfileImage,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(
+                                      Icon(
                                         Icons.person,
                                         size: 60,
-                                        color: Colors.white24,
+                                        color: AppColors.textPrimary.withOpacity(0.24),
                                       ),
                                 )
-                              : const Icon(
+                              : Icon(
                                   Icons.person,
                                   size: 60,
-                                  color: Colors.white24,
+                                  color: AppColors.textPrimary.withOpacity(0.24),
                                 ),
                         ),
                       ),
@@ -323,7 +320,7 @@ class ProfileTab extends StatelessWidget {
                   Text(
                     student.fullName.toUpperCase(),
                     style: AppFonts.main(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1,
@@ -340,13 +337,13 @@ class ProfileTab extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: AppColors.textPrimary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           'ID - ${student.uuid}',
                           style: AppFonts.main(
-                            color: Colors.white70,
+                            color: AppColors.textPrimary.withOpacity(0.7),
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
@@ -367,14 +364,14 @@ class ProfileTab extends StatelessWidget {
                           children: [
                             const Icon(
                               Icons.check_circle_outline,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               size: 12,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               student.applicationStatus.toUpperCase(),
                               style: AppFonts.main(
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.5,
@@ -444,11 +441,11 @@ class ProfileTab extends StatelessWidget {
       width: 105 * scaleFactor,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.darkBg.withOpacity(0.05),
             blurRadius: 15,
             offset: const Offset(0, 10),
           ),
@@ -464,7 +461,7 @@ class ProfileTab extends StatelessWidget {
               Text(
                 label,
                 style: AppFonts.main(
-                  color: Colors.black26,
+                  color: AppColors.darkBg.withOpacity(0.26),
                   fontSize: 9 * scaleFactor,
                   fontWeight: FontWeight.w900,
                 ),
@@ -475,7 +472,7 @@ class ProfileTab extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: AppFonts.main(
-                color: Colors.black,
+                color: AppColors.darkBg,
                 fontSize: 20 * scaleFactor,
                 fontWeight: FontWeight.w900,
               ),
@@ -486,7 +483,7 @@ class ProfileTab extends StatelessWidget {
                     text: ' $unit',
                     style: TextStyle(
                       fontSize: 10 * scaleFactor,
-                      color: Colors.black26,
+                      color: AppColors.darkBg.withOpacity(0.26),
                     ),
                   ),
               ],
@@ -519,7 +516,7 @@ class ProfileTab extends StatelessWidget {
             Text(
               label,
               style: AppFonts.main(
-                color: Colors.black12,
+                color: AppColors.darkBg.withOpacity(0.12),
                 fontSize: 12 * scaleFactor,
                 fontWeight: FontWeight.w900,
               ),
@@ -528,7 +525,7 @@ class ProfileTab extends StatelessWidget {
             Expanded(
               child: Container(
                 height: 1,
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.darkBg.withOpacity(0.05),
               ),
             ),
           ],
@@ -537,7 +534,7 @@ class ProfileTab extends StatelessWidget {
         Text(
           title,
           style: AppFonts.heading(
-            color: Colors.black,
+            color: AppColors.darkBg,
             fontSize: 22 * scaleFactor,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -556,12 +553,12 @@ class ProfileTab extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.black.withOpacity(0.03)),
+        border: Border.all(color: AppColors.darkBg.withOpacity(0.03)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.darkBg.withOpacity(0.02),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -578,7 +575,7 @@ class ProfileTab extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 60 * scaleFactor),
                   child: Divider(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.darkBg.withOpacity(0.05),
                     height: 1,
                   ),
                 ),
@@ -610,18 +607,18 @@ class ProfileTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.black.withOpacity(0.03)),
+              border: Border.all(color: AppColors.darkBg.withOpacity(0.03)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: AppColors.darkBg.withOpacity(0.03),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Icon(icon, size: 20, color: AppColors.primaryAccent),
+            child: Icon(icon, size: 20, color: AppColors.deepAccent.withOpacity(0.8)),
           ),
           SizedBox(width: 16 * scaleFactor),
           Expanded(
@@ -631,18 +628,19 @@ class ProfileTab extends StatelessWidget {
                 Text(
                   label,
                   style: AppFonts.main(
-                    color: Colors.black26,
+                    color: AppColors.textGrey.withOpacity(0.8),
                     fontSize: 10 * scaleFactor,
                     fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
                   style: AppFonts.main(
-                    color: Colors.black,
+                    color: AppColors.textDark,
                     fontSize: 15 * scaleFactor,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
