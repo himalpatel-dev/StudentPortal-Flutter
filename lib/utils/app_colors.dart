@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+
+class AppColors {
+  // Brand Colors - Blue Theme
+  static const Color primaryAccent = Color(0xFF3B82F6);
+  static const Color secondaryAccent = Color(0xFF60A5FA);
+  static const Color deepAccent = Color(0xFF1E40AF);
+  static const Color darkBlueGradient = Color(
+    0xFF172554,
+  ); // Very dark blue for top gradient
+
+  static const Color darkBg = Color(0xFF0F0F0F);
+  static const Color cardDark = Color(0xFF171717);
+  static const Color surfaceDark = Color(0xFF1F1F1F);
+
+  // Text Colors
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFA3A3A3);
+  static const Color textDisabled = Color(0xFF525252);
+  static const Color textDark = Color(0xFF000000);
+  static const Color textGrey = Color(0xFF6B7280);
+
+  // Field Colors
+  static const Color fieldBg = Color(0xFFFBFBFB);
+  static const Color fieldBorder = Color(0xFFE5E7EB);
+
+  // Status Colors
+  static const Color success = Color(0xFF10B981);
+  static const Color error = Color(0xFFEF4444);
+  static const Color info = Color(0xFF3B82F6);
+}
