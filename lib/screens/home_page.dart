@@ -295,7 +295,7 @@ class _HomePageState extends State<HomePage> {
         _buildStatCard(
           'Tournaments',
           stats.totalTournamentsPlayed.toString(),
-          Icons.emoji_events_rounded,
+          Icons.sports_martial_arts_outlined,
           primaryStatColor,
         ),
         const SizedBox(width: 12),
@@ -309,7 +309,7 @@ class _HomePageState extends State<HomePage> {
         _buildStatCard(
           'Wins',
           stats.totalWins.toString(),
-          Icons.whatshot_rounded,
+          Icons.emoji_events_rounded,
           primaryStatColor,
         ),
       ],
@@ -838,7 +838,7 @@ class _HomePageState extends State<HomePage> {
                       left: 24,
                       right: 24,
                       top: 12,
-                      bottom: 24,
+                      bottom: 12,
                     ),
                     decoration: BoxDecoration(
                       borderRadius: const BorderRadius.vertical(
@@ -854,85 +854,49 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Handle and Close Button Row
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Colors.white24,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: Colors.white24,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: GestureDetector(
-                                onTap: () => Navigator.pop(context),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white24,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
-
                         // Tournament Pill
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                            horizontal: 20,
+                            vertical: 10,
                           ),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
-                                  Icons.emoji_events_rounded,
-                                  color: Colors.white,
-                                  size: 32,
+                                child: Icon(
+                                  Icons.sports_gymnastics_rounded,
+                                  color: AppColors.textPrimary,
+                                  size: 24,
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'TOURNAMENT',
-                                      style: AppFonts.main(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppColors.secondaryAccent,
-                                        letterSpacing: 2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
                                       tournament.tournamentName.toUpperCase(),
                                       style: AppFonts.heading(
-                                        fontSize: 28,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w900,
                                         color: Colors.white,
                                         height: 1.1,
+                                        letterSpacing: 0.5,
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -990,7 +954,7 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             const Icon(
                               Icons.my_location_rounded,
-                              color: AppColors.primaryAccent,
+                              color: AppColors.deepAccent,
                               size: 14,
                             ),
                             const SizedBox(width: 8),
@@ -999,7 +963,7 @@ class _HomePageState extends State<HomePage> {
                               style: AppFonts.main(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
-                                color: Colors.black54,
+                                color: AppColors.deepAccent,
                                 letterSpacing: 1,
                               ),
                             ),
@@ -1035,48 +999,59 @@ class _HomePageState extends State<HomePage> {
                               icon: Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.secondaryAccent.withOpacity(0.1),
+                                  color: AppColors.secondaryAccent.withOpacity(
+                                    0.1,
+                                  ),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
                                   Icons.keyboard_arrow_down_rounded,
                                   color: AppColors.secondaryAccent,
-                                  size: 20,
+                                  size: 15,
                                 ),
                               ),
                               items: allCategories.map<DropdownMenuItem<int>>((
                                 cat,
                               ) {
-                                final bool isSelected = cat['category_division_id'] == selectedCategoryId;
+                                final bool isSelected =
+                                    cat['category_division_id'] ==
+                                    selectedCategoryId;
                                 return DropdownMenuItem<int>(
                                   value: cat['category_division_id'],
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: isSelected 
-                                          ? AppColors.secondaryAccent.withOpacity(0.08) 
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(10),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
                                     ),
+
                                     child: Row(
                                       children: [
                                         if (isSelected)
                                           Container(
                                             width: 4,
                                             height: 16,
-                                            margin: const EdgeInsets.only(right: 10),
+                                            margin: const EdgeInsets.only(
+                                              right: 10,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: AppColors.secondaryAccent,
-                                              borderRadius: BorderRadius.circular(2),
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
                                             ),
                                           ),
                                         Expanded(
                                           child: Text(
-                                            cat['category_division_name']?.toString() ?? '',
+                                            cat['category_division_name']
+                                                    ?.toString() ??
+                                                '',
                                             style: AppFonts.heading(
-                                              fontSize: 14,
-                                              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                                              color: isSelected ? AppColors.secondaryAccent : AppColors.textDark,
+                                              fontSize: 12,
+                                              fontWeight: isSelected
+                                                  ? FontWeight.w900
+                                                  : FontWeight.w700,
+                                              color: isSelected
+                                                  ? AppColors.secondaryAccent
+                                                  : AppColors.textDark,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -1222,7 +1197,7 @@ class _HomePageState extends State<HomePage> {
                   height: 45,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primaryAccent.withOpacity(0.08),
+                    color: AppColors.primaryAccent.withOpacity(0.28),
                   ),
                 ),
               ),
@@ -1237,7 +1212,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Row(
                       children: [
-                        Icon(icon, color: AppColors.primaryAccent, size: 10),
+                        Icon(icon, color: AppColors.deepAccent, size: 10),
                         const SizedBox(width: 4),
                         Text(
                           label,
@@ -1261,7 +1236,7 @@ class _HomePageState extends State<HomePage> {
                           style: AppFonts.heading(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
-                            color: Colors.black87,
+                            color: AppColors.deepAccent,
                           ),
                         ),
                         if (unit.isNotEmpty &&

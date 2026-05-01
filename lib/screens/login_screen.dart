@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Text(
                                   'MOBILE VERIFICATION',
                                   style: AppFonts.main(
-                                    color: Colors.black,
+                                    color: AppColors.deepAccent,
                                     fontSize: 14 * scaleFactor,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 1.2,
@@ -171,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Expanded(
                                   child: Container(
                                     height: 1.5,
-                                    color: Colors.black12,
+                                    color: AppColors.deepAccent,
                                   ),
                                 ),
                                 SizedBox(width: 8 * scaleFactor),
@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 6,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.primaryAccent,
+                                    color: AppColors.deepAccent,
                                   ),
                                 ),
                               ],
@@ -284,16 +284,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     borderRadius: BorderRadius.circular(25),
                                     gradient: const LinearGradient(
                                       colors: [
-                                        AppColors.secondaryAccent,
-                                        AppColors.primaryAccent,
+                                        AppColors.darkBg,
+                                        AppColors.deepAccent,
                                       ],
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.primaryAccent
-                                            .withOpacity(0.4),
+                                        color: AppColors.deepAccent.withOpacity(
+                                          0.3,
+                                        ),
                                         blurRadius: 15,
                                         offset: const Offset(0, 8),
                                       ),

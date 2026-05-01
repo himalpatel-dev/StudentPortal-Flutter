@@ -282,7 +282,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Demo data filled successfully!'),
-        backgroundColor: Color(0xFF2196F3),
+        backgroundColor: AppColors.info,
       ),
     );
   }
@@ -373,7 +373,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Registration completed successfully!'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
         Navigator.of(context).pop();
@@ -385,7 +385,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             content: Text(
               studentProvider.errorMessage ?? 'Registration failed',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -397,495 +397,516 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.fieldBg,
         body: SafeArea(
           bottom: true,
           top: false,
           child: Column(
-        children: [
-          _buildHeader(),
-          _buildCustomStepper(),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (index) {
-                setState(() => _currentStep = index);
-              },
-              children: [
-                _buildStep(
-                  formKey: _formKeys[0],
-                  fields: [
-                    _buildHeadshotUpload(),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader(Icons.person_outline, 'BASIC DETAILS'),
-                    const SizedBox(height: 24),
-                    _buildFieldLabelWrapper(
-                      'FIRST NAME',
-                      _buildModernTextField(
-                        _firstNameController,
-                        'First Name',
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'MIDDLE NAME',
-                      _buildModernTextField(
-                        _middleNameController,
-                        'Middle Name',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'LAST NAME',
-                      _buildModernTextField(
-                        _lastNameController,
-                        'Last Name',
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper('GENDER', _buildModernRadioGroup()),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: _buildFieldLabelWrapper(
-                            'DATE OF BIRTH',
-                            _buildModernDateField(_dobController, 'dd-mm-yyyy'),
-                            isRequired: true,
+            children: [
+              _buildHeader(),
+              _buildCustomStepper(),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (index) {
+                    setState(() => _currentStep = index);
+                  },
+                  children: [
+                    _buildStep(
+                      formKey: _formKeys[0],
+                      fields: [
+                        _buildHeadshotUpload(),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader(
+                          Icons.person_outline,
+                          'BASIC DETAILS',
+                        ),
+                        const SizedBox(height: 24),
+                        _buildFieldLabelWrapper(
+                          'FIRST NAME',
+                          _buildModernTextField(
+                            _firstNameController,
+                            'First Name',
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'MIDDLE NAME',
+                          _buildModernTextField(
+                            _middleNameController,
+                            'Middle Name',
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 1,
-                          child: _buildFieldLabelWrapper(
-                            'AGE',
-                            Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'LAST NAME',
+                          _buildModernTextField(
+                            _lastNameController,
+                            'Last Name',
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'GENDER',
+                          _buildModernRadioGroup(),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: _buildFieldLabelWrapper(
+                                'DATE OF BIRTH',
+                                _buildModernDateField(
+                                  _dobController,
+                                  'dd-mm-yyyy',
+                                ),
+                                isRequired: true,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 1,
+                              child: _buildFieldLabelWrapper(
+                                'AGE',
+                                Stack(
+                                  alignment: Alignment.centerRight,
+                                  children: [
+                                    _buildModernTextField(
+                                      _ageController,
+                                      '14',
+                                      keyboardType: TextInputType.number,
+                                      readOnly: true,
+                                      validator: (v) =>
+                                          _ageController.text.isEmpty
+                                          ? 'Required'
+                                          : null,
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 12),
+                                      child: Text(
+                                        'YRS',
+                                        style: TextStyle(
+                                          color: AppColors.textDisabled,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                isRequired: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'AADHAR NUMBER',
+                          _buildModernTextField(
+                            _aadharController,
+                            '0000-0000-0000',
+                            icon: Icons.credit_card_outlined,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(12),
+                              _AadharFormatter(),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (v.replaceAll('-', '').length < 12) {
+                                return 'Enter 12 digits';
+                              }
+                              return null;
+                            },
+                          ),
+                          isRequired: true,
+                        ),
+                      ],
+                    ),
+                    _buildStep(
+                      formKey: _formKeys[1],
+                      fields: [
+                        _buildSectionHeader(
+                          Icons.contact_mail_outlined,
+                          'CONTACT',
+                        ),
+                        const SizedBox(height: 24),
+                        _buildFieldLabelWrapper(
+                          'EMAIL ADDRESS',
+                          _buildModernTextField(
+                            _emailController,
+                            'example@domain.com',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (!RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              ).hasMatch(v)) {
+                                return 'Enter valid email';
+                              }
+                              return null;
+                            },
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'MOBILE NUMBER',
+                          _buildModernTextField(
+                            _contactController,
+                            '9876543210',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (v.length < 10) return 'Enter 10 digits';
+                              if (!RegExp(r'^[6-9]').hasMatch(v)) {
+                                return 'Enter valid mobile no';
+                              }
+                              return null;
+                            },
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 32),
+                        _buildSectionHeader(
+                          Icons.location_on_outlined,
+                          'ADDRESS',
+                        ),
+                        const SizedBox(height: 24),
+                        Consumer<StudentProvider>(
+                          builder: (context, provider, child) {
+                            return _buildFieldLabelWrapper(
+                              'COUNTRY',
+                              _buildModernDropdown<int>(
+                                value: _selectedCountryId,
+                                options: provider.countries
+                                    .map((c) => c.id)
+                                    .toList(),
+                                getTitle: (id) => provider.countries
+                                    .firstWhere((c) => c.id == id)
+                                    .name,
+                                validator: (v) => v == null ? 'Required' : null,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _selectedCountryId = val;
+                                    _selectedCountryName = provider.countries
+                                        .firstWhere((c) => c.id == val)
+                                        .name;
+                                    _selectedStateId = null;
+                                    _selectedDistrictId = null;
+                                    _selectedCityId = null;
+                                  });
+                                  provider.fetchStates(val!);
+                                },
+                                hint: 'Select Country',
+                              ),
+                              isRequired: true,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Consumer<StudentProvider>(
+                          builder: (context, provider, child) {
+                            return _buildFieldLabelWrapper(
+                              'STATE',
+                              _buildModernDropdown<int>(
+                                value: _selectedStateId,
+                                options: provider.states
+                                    .map((s) => s.id)
+                                    .toList(),
+                                getTitle: (id) => provider.states
+                                    .firstWhere((s) => s.id == id)
+                                    .name,
+                                validator: (v) => v == null ? 'Required' : null,
+                                onChanged: (val) {
+                                  setState(() {
+                                    _selectedStateId = val;
+                                    _selectedStateName = provider.states
+                                        .firstWhere((s) => s.id == val)
+                                        .name;
+                                    _selectedDistrictId = null;
+                                    _selectedCityId = null;
+                                  });
+                                  provider.fetchDistricts(val!);
+                                },
+                                hint: 'Select State',
+                              ),
+                              isRequired: true,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Consumer<StudentProvider>(
+                                builder: (context, provider, child) {
+                                  return _buildFieldLabelWrapper(
+                                    'DISTRICT',
+                                    _buildModernDropdown<int>(
+                                      value: _selectedDistrictId,
+                                      options: provider.districts
+                                          .map((d) => d.id)
+                                          .toList(),
+                                      getTitle: (id) => provider.districts
+                                          .firstWhere((d) => d.id == id)
+                                          .name,
+                                      validator: (v) =>
+                                          v == null ? 'Required' : null,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedDistrictId = val;
+                                          _selectedDistrictName = provider
+                                              .districts
+                                              .firstWhere((d) => d.id == val)
+                                              .name;
+                                          _selectedCityId = null;
+                                        });
+                                        provider.fetchCities(val!);
+                                      },
+                                      hint: 'Select District',
+                                    ),
+                                    isRequired: true,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Consumer<StudentProvider>(
+                                builder: (context, provider, child) {
+                                  return _buildFieldLabelWrapper(
+                                    'CITY',
+                                    _buildModernDropdown<int>(
+                                      value: _selectedCityId,
+                                      options: provider.cities
+                                          .map((c) => c.id)
+                                          .toList(),
+                                      getTitle: (id) => provider.cities
+                                          .firstWhere((c) => c.id == id)
+                                          .name,
+                                      validator: (v) =>
+                                          v == null ? 'Required' : null,
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedCityId = val;
+                                          _selectedCityName = provider.cities
+                                              .firstWhere((c) => c.id == val)
+                                              .name;
+                                        });
+                                      },
+                                      hint: 'Select City',
+                                    ),
+                                    isRequired: true,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'PINCODE',
+                          _buildModernTextField(
+                            _pincodeController,
+                            '000000',
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(6),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (v.length < 6) return 'Enter 6 digits';
+                              return null;
+                            },
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'RESIDENTIAL ADDRESS',
+                          _buildModernTextField(
+                            _addressController,
+                            'Street name, Area, House no.',
+                            maxLines: 2,
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
+                          isRequired: true,
+                        ),
+                      ],
+                    ),
+                    _buildStep(
+                      formKey: _formKeys[2],
+                      fields: [
+                        _buildSectionHeader(Icons.people_outline, 'PARENTS'),
+                        const SizedBox(height: 24),
+                        _buildFieldLabelWrapper(
+                          "FATHER'S NAME",
+                          _buildModernTextField(
+                            _fatherNameController,
+                            'Full Name',
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          "MOTHER'S NAME",
+                          _buildModernTextField(
+                            _motherNameController,
+                            'Full Name',
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Required' : null,
+                          ),
+                          isRequired: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'EMERGENCY CONTACT',
+                          _buildModernTextField(
+                            _emergencyContactController,
+                            '9876543210',
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (v.length < 10) return 'Enter 10 digits';
+                              if (!RegExp(r'^[6-9]').hasMatch(v)) {
+                                return 'Enter valid mobile no';
+                              }
+                              return null;
+                            },
+                          ),
+                          isRequired: true,
+                        ),
+                      ],
+                    ),
+                    _buildStep(
+                      formKey: _formKeys[3],
+                      fields: [
+                        _buildSectionHeader(Icons.straighten, 'MEASUREMENTS'),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildFieldLabelWrapper(
+                                'HEIGHT (CM)',
                                 _buildModernTextField(
-                                  _ageController,
-                                  '14',
+                                  _heightController,
+                                  '170',
                                   keyboardType: TextInputType.number,
-                                  readOnly: true,
-                                  validator: (v) => _ageController.text.isEmpty
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(3),
+                                  ],
+                                  validator: (v) => v == null || v.isEmpty
                                       ? 'Required'
                                       : null,
                                 ),
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 12),
-                                  child: Text(
-                                    'YRS',
-                                    style: TextStyle(
-                                      color: Color(0xFF9CA3AF),
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                                isRequired: true,
+                              ),
                             ),
-                            isRequired: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'AADHAR NUMBER',
-                      _buildModernTextField(
-                        _aadharController,
-                        '0000-0000-0000',
-                        icon: Icons.credit_card_outlined,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(12),
-                          _AadharFormatter(),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (v.replaceAll('-', '').length < 12) {
-                            return 'Enter 12 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                  ],
-                ),
-                _buildStep(
-                  formKey: _formKeys[1],
-                  fields: [
-                    _buildSectionHeader(Icons.contact_mail_outlined, 'CONTACT'),
-                    const SizedBox(height: 24),
-                    _buildFieldLabelWrapper(
-                      'EMAIL ADDRESS',
-                      _buildModernTextField(
-                        _emailController,
-                        'example@domain.com',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (!RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(v)) {
-                            return 'Enter valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'MOBILE NUMBER',
-                      _buildModernTextField(
-                        _contactController,
-                        '9876543210',
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (v.length < 10) return 'Enter 10 digits';
-                          if (!RegExp(r'^[6-9]').hasMatch(v)) {
-                            return 'Enter valid mobile no';
-                          }
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 32),
-                    _buildSectionHeader(Icons.location_on_outlined, 'ADDRESS'),
-                    const SizedBox(height: 24),
-                    Consumer<StudentProvider>(
-                      builder: (context, provider, child) {
-                        return _buildFieldLabelWrapper(
-                          'COUNTRY',
-                          _buildModernDropdown<int>(
-                            value: _selectedCountryId,
-                            options: provider.countries
-                                .map((c) => c.id)
-                                .toList(),
-                            getTitle: (id) => provider.countries
-                                .firstWhere((c) => c.id == id)
-                                .name,
-                            validator: (v) => v == null ? 'Required' : null,
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedCountryId = val;
-                                _selectedCountryName = provider.countries
-                                    .firstWhere((c) => c.id == val)
-                                    .name;
-                                _selectedStateId = null;
-                                _selectedDistrictId = null;
-                                _selectedCityId = null;
-                              });
-                              provider.fetchStates(val!);
-                            },
-                            hint: 'Select Country',
-                          ),
-                          isRequired: true,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Consumer<StudentProvider>(
-                      builder: (context, provider, child) {
-                        return _buildFieldLabelWrapper(
-                          'STATE',
-                          _buildModernDropdown<int>(
-                            value: _selectedStateId,
-                            options: provider.states.map((s) => s.id).toList(),
-                            getTitle: (id) => provider.states
-                                .firstWhere((s) => s.id == id)
-                                .name,
-                            validator: (v) => v == null ? 'Required' : null,
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedStateId = val;
-                                _selectedStateName = provider.states
-                                    .firstWhere((s) => s.id == val)
-                                    .name;
-                                _selectedDistrictId = null;
-                                _selectedCityId = null;
-                              });
-                              provider.fetchDistricts(val!);
-                            },
-                            hint: 'Select State',
-                          ),
-                          isRequired: true,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Consumer<StudentProvider>(
-                            builder: (context, provider, child) {
-                              return _buildFieldLabelWrapper(
-                                'DISTRICT',
-                                _buildModernDropdown<int>(
-                                  value: _selectedDistrictId,
-                                  options: provider.districts
-                                      .map((d) => d.id)
-                                      .toList(),
-                                  getTitle: (id) => provider.districts
-                                      .firstWhere((d) => d.id == id)
-                                      .name,
-                                  validator: (v) =>
-                                      v == null ? 'Required' : null,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _selectedDistrictId = val;
-                                      _selectedDistrictName = provider.districts
-                                          .firstWhere((d) => d.id == val)
-                                          .name;
-                                      _selectedCityId = null;
-                                    });
-                                    provider.fetchCities(val!);
-                                  },
-                                  hint: 'Select District',
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildFieldLabelWrapper(
+                                'WEIGHT (KG)',
+                                _buildModernTextField(
+                                  _weightController,
+                                  '65',
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(3),
+                                  ],
+                                  validator: (v) => v == null || v.isEmpty
+                                      ? 'Required'
+                                      : null,
                                 ),
                                 isRequired: true,
-                              );
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'PHYSICAL INDEX',
+                          _buildModernTextField(
+                            _physicalIndexController,
+                            '0.00',
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}'),
+                              ),
+                            ],
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return 'Required';
+                              if (double.tryParse(v) == null) {
+                                return 'Enter valid decimal';
+                              }
+                              return null;
                             },
                           ),
+                          isRequired: true,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Consumer<StudentProvider>(
-                            builder: (context, provider, child) {
-                              return _buildFieldLabelWrapper(
-                                'CITY',
-                                _buildModernDropdown<int>(
-                                  value: _selectedCityId,
-                                  options: provider.cities
-                                      .map((c) => c.id)
-                                      .toList(),
-                                  getTitle: (id) => provider.cities
-                                      .firstWhere((c) => c.id == id)
-                                      .name,
-                                  validator: (v) =>
-                                      v == null ? 'Required' : null,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _selectedCityId = val;
-                                      _selectedCityName = provider.cities
-                                          .firstWhere((c) => c.id == val)
-                                          .name;
-                                    });
-                                  },
-                                  hint: 'Select City',
-                                ),
-                                isRequired: true,
-                              );
-                            },
+                        const SizedBox(height: 16),
+                        _buildFieldLabelWrapper(
+                          'CLUB AFFILIATION',
+                          _buildModernTextField(
+                            _clubAffiliationController,
+                            'Club Name',
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'PINCODE',
-                      _buildModernTextField(
-                        _pincodeController,
-                        '000000',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (v.length < 6) return 'Enter 6 digits';
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'RESIDENTIAL ADDRESS',
-                      _buildModernTextField(
-                        _addressController,
-                        'Street name, Area, House no.',
-                        maxLines: 2,
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      isRequired: true,
-                    ),
-                  ],
-                ),
-                _buildStep(
-                  formKey: _formKeys[2],
-                  fields: [
-                    _buildSectionHeader(Icons.people_outline, 'PARENTS'),
-                    const SizedBox(height: 24),
-                    _buildFieldLabelWrapper(
-                      "FATHER'S NAME",
-                      _buildModernTextField(
-                        _fatherNameController,
-                        'Full Name',
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      "MOTHER'S NAME",
-                      _buildModernTextField(
-                        _motherNameController,
-                        'Full Name',
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Required' : null,
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'EMERGENCY CONTACT',
-                      _buildModernTextField(
-                        _emergencyContactController,
-                        '9876543210',
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (v.length < 10) return 'Enter 10 digits';
-                          if (!RegExp(r'^[6-9]').hasMatch(v)) {
-                            return 'Enter valid mobile no';
-                          }
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                  ],
-                ),
-                _buildStep(
-                  formKey: _formKeys[3],
-                  fields: [
-                    _buildSectionHeader(Icons.straighten, 'MEASUREMENTS'),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildFieldLabelWrapper(
-                            'HEIGHT (CM)',
-                            _buildModernTextField(
-                              _heightController,
-                              '170',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(3),
-                              ],
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? 'Required' : null,
-                            ),
-                            isRequired: true,
-                          ),
+                    _buildStep(
+                      formKey: _formKeys[4],
+                      fields: [
+                        _buildSectionHeader(
+                          Icons.description_outlined,
+                          'DOCUMENTS',
+                          showDot: false,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildFieldLabelWrapper(
-                            'WEIGHT (KG)',
-                            _buildModernTextField(
-                              _weightController,
-                              '65',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(3),
-                              ],
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? 'Required' : null,
-                            ),
-                            isRequired: true,
-                          ),
+                        const SizedBox(height: 32),
+                        _buildModernDocumentCard(
+                          title: 'IDENTITY DOCUMENT',
+                          isIdentity: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernDocumentCard(
+                          title: 'OTHER DOCUMENTS',
+                          isIdentity: false,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'PHYSICAL INDEX',
-                      _buildModernTextField(
-                        _physicalIndexController,
-                        '0.00',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}'),
-                          ),
-                        ],
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          if (double.tryParse(v) == null) {
-                            return 'Enter valid decimal';
-                          }
-                          return null;
-                        },
-                      ),
-                      isRequired: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildFieldLabelWrapper(
-                      'CLUB AFFILIATION',
-                      _buildModernTextField(
-                        _clubAffiliationController,
-                        'Club Name',
-                      ),
-                    ),
                   ],
                 ),
-                _buildStep(
-                  formKey: _formKeys[4],
-                  fields: [
-                    _buildSectionHeader(
-                      Icons.description_outlined,
-                      'DOCUMENTS',
-                      showDot: false,
-                    ),
-                    const SizedBox(height: 32),
-                    _buildModernDocumentCard(
-                      title: 'IDENTITY DOCUMENT',
-                      isIdentity: true,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildModernDocumentCard(
-                      title: 'OTHER DOCUMENTS',
-                      isIdentity: false,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              _buildModernFooter(),
+            ],
           ),
-          _buildModernFooter(),
-        ],
-      ),
-      ),
+        ),
       ),
     );
   }
@@ -895,10 +916,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.darkBg,
-        gradient: RadialGradient(
-          center: Alignment.topRight,
-          radius: 1.5,
-          colors: [Color.fromARGB(255, 57, 96, 160), AppColors.darkBg],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.darkBg, AppColors.deepAccent],
         ),
       ),
       child: SafeArea(
@@ -918,13 +939,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         color: AppColors.surfaceDark,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.05),
+                          color: AppColors.textPrimary.withOpacity(0.05),
                           width: 1,
                         ),
                       ),
                       child: const Icon(
                         Icons.arrow_back,
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         size: 20,
                       ),
                     ),
@@ -936,7 +957,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const Text(
                         'Athlete Enrollment',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1,
@@ -945,6 +966,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ],
                   ),
                   const Spacer(),
+
                   // InkWell(
                   //   onTap: _fillDemoData,
                   //   borderRadius: BorderRadius.circular(14),
@@ -967,42 +989,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   //   ),
                   // ),
                   //const Spacer(),
-                  Container(
-                    width: 60,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryAccent.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.primaryAccent.withOpacity(0.3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Center(
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '0${_currentStep + 1}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '/05',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.3),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -1011,7 +997,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Container(
                   height: 1.5,
                   width: double.infinity,
-                  color: Colors.white.withOpacity(0.08),
+                  color: AppColors.textPrimary.withOpacity(0.08),
                 ),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
@@ -1026,13 +1012,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               width: double.infinity,
-              color: Colors.black.withOpacity(0.15),
+              color: AppColors.darkBg.withOpacity(0.15),
               child: Row(
                 children: [
                   Text(
                     '›  ${_getStepName(_currentStep)}',
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
@@ -1044,7 +1030,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(
                         'NEXT',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
+                          color: AppColors.textPrimary.withOpacity(0.56),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
@@ -1055,7 +1041,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         width: 3,
                         height: 3,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: AppColors.textPrimary.withOpacity(0.25),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -1063,7 +1049,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(
                         _getStepName(_currentStep + 1),
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
+                          color: AppColors.textPrimary.withOpacity(0.55),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
@@ -1095,13 +1081,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget _buildCustomStepper() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 30),
-      decoration: BoxDecoration(
-        color: Colors.white,
+      decoration: const BoxDecoration(
+        color: AppColors.textPrimary,
         border: Border(
-          bottom: BorderSide(
-            color: AppColors.fieldBorder.withOpacity(0.5),
-            width: 1,
-          ),
+          bottom: BorderSide(color: AppColors.fieldBorder, width: 1),
         ),
       ),
       child: Row(
@@ -1133,19 +1116,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     height: 34,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColors.primaryAccent
-                          : (isCompleted ? Colors.black : Colors.white),
+                          ? AppColors.secondaryAccent.withOpacity(0.8)
+                          : (isCompleted
+                                ? AppColors.deepAccent
+                                : AppColors.textPrimary),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: isActive || isCompleted
-                            ? Colors.transparent
+                            ? AppColors.darkBg.withOpacity(0.3)
                             : AppColors.fieldBorder,
                         width: 1.5,
                       ),
                       boxShadow: isActive
                           ? [
                               BoxShadow(
-                                color: AppColors.primaryAccent.withOpacity(0.3),
+                                color: AppColors.secondaryAccent.withOpacity(
+                                  0.3,
+                                ),
                                 blurRadius: 10,
                                 spreadRadius: 2,
                               ),
@@ -1157,7 +1144,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         '0${index + 1}',
                         style: TextStyle(
                           color: isActive || isCompleted
-                              ? Colors.white
+                              ? AppColors.textPrimary
                               : AppColors.textDisabled,
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
@@ -1171,7 +1158,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         height: 1.5,
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         color: isCompleted
-                            ? Colors.black
+                            ? AppColors.darkBg
                             : AppColors.fieldBorder,
                       ),
                     ),
@@ -1210,10 +1197,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: const BoxDecoration(
-            color: AppColors.darkBg,
+            color: AppColors.deepAccent,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 14, color: Colors.white),
+          child: Icon(icon, size: 14, color: AppColors.textPrimary),
         ),
         const SizedBox(width: 12),
         Text(
@@ -1221,7 +1208,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w900,
-            color: AppColors.textDark,
+            color: AppColors.deepAccent,
             letterSpacing: 1,
           ),
         ),
@@ -1233,7 +1220,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             width: 4,
             height: 4,
             decoration: const BoxDecoration(
-              color: AppColors.primaryAccent,
+              color: AppColors.deepAccent,
               shape: BoxShape.circle,
             ),
           ),
@@ -1245,8 +1232,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget _buildHeadshotUpload() {
     return FormField<Uint8List?>(
       initialValue: _pickedImageBytes,
-      validator: (val) =>
-          _pickedImageBytes == null ? 'Profile image is required' : null,
+      validator: (val) => val == null ? 'Profile image is required' : null,
       builder: (state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1262,14 +1248,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [AppColors.darkBg, Color(0xFF262626)],
+                      colors: [AppColors.darkBg, AppColors.deepAccent],
                     ),
                     border: state.hasError
                         ? Border.all(color: AppColors.error, width: 2)
                         : null,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: AppColors.darkBg.withOpacity(0.2),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -1283,7 +1269,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         child: Icon(
                           Icons.person,
                           size: 150,
-                          color: Colors.white.withOpacity(0.03),
+                          color: AppColors.textPrimary.withOpacity(0.03),
                         ),
                       ),
                       if (_pickedImageBytes != null)
@@ -1296,16 +1282,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 _pickedImageBytes = null;
                                 _imageBase64 = null;
                               });
+                              state.didChange(null);
+                              state.validate();
                             },
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: AppColors.secondaryAccent,
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
                                 Icons.close,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 size: 16,
                               ),
                             ),
@@ -1316,7 +1304,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         child: Row(
                           children: [
                             InkWell(
-                              onTap: _pickImage,
+                              onTap: () async {
+                                await _pickImage();
+                                state.didChange(_pickedImageBytes);
+                                state.validate();
+                              },
                               borderRadius: BorderRadius.circular(40),
                               child: Stack(
                                 alignment: Alignment.center,
@@ -1327,7 +1319,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
+                                        color: AppColors.textPrimary
+                                            .withOpacity(0.5),
                                         width: 1,
                                       ),
                                     ),
@@ -1339,9 +1332,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             )
                                           : Icon(
                                               Icons.person,
-                                              color: Colors.white.withOpacity(
-                                                0.2,
-                                              ),
+                                              color: AppColors.deepAccent,
                                               size: 40,
                                             ),
                                     ),
@@ -1352,15 +1343,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primaryAccent,
+                                        color: AppColors.secondaryAccent,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: AppColors.darkBg,
+                                          color: AppColors.surfaceDark,
                                           width: 2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.primaryAccent
+                                            color: AppColors.secondaryAccent
                                                 .withOpacity(0.4),
                                             blurRadius: 8,
                                             offset: const Offset(0, 2),
@@ -1370,7 +1361,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       child: const Icon(
                                         Icons.camera_alt,
                                         size: 14,
-                                        color: Colors.white,
+                                        color: AppColors.textPrimary,
                                       ),
                                     ),
                                   ),
@@ -1386,7 +1377,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   const Text(
                                     'PROFILE IMAGE',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.textPrimary,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 1,
@@ -1398,7 +1389,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                         ? 'Image selected successfully'
                                         : 'Upload a clear profile photo',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: AppColors.textPrimary.withOpacity(
+                                        0.5,
+                                      ),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -1406,7 +1399,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   Text(
                                     'JPG / PNG · Max 2MB',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: AppColors.textPrimary.withOpacity(
+                                        0.5,
+                                      ),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -1447,7 +1442,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w900,
-            color: AppColors.textDark.withOpacity(0.8),
+            color: AppColors.deepAccent.withOpacity(0.8),
             letterSpacing: 1.2,
           ),
         ),
@@ -1461,7 +1456,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.error.withOpacity(0.5), width: 1),
         boxShadow: [
@@ -1524,7 +1519,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   fontWeight: FontWeight.w500,
                 ),
                 prefixIcon: icon != null
-                    ? Icon(icon, color: AppColors.primaryAccent, size: 18)
+                    ? Icon(icon, color: AppColors.deepAccent, size: 18)
                     : null,
                 filled: true,
                 fillColor: AppColors.fieldBg,
@@ -1553,7 +1548,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(
-                    color: AppColors.primaryAccent,
+                    color: AppColors.secondaryAccent,
                     width: 2,
                   ),
                 ),
@@ -1605,13 +1600,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primaryAccent
+                      ? AppColors.secondaryAccent
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: AppColors.primaryAccent.withOpacity(0.2),
+                            color: AppColors.secondaryAccent.withOpacity(0.2),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -1664,9 +1659,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     return Theme(
                       data: Theme.of(context).copyWith(
                         colorScheme: const ColorScheme.light(
-                          primary: AppColors.primaryAccent,
+                          primary: AppColors.deepAccent,
                           onPrimary: Colors.white,
-                          onSurface: AppColors.darkBg,
+                          onSurface: AppColors.deepAccent,
                         ),
                       ),
                       child: child!,
@@ -1682,6 +1677,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   });
                   state.didChange(controller.text);
                   state.validate();
+
+                  // Auto-validate current form step to clear error on auto-filled age field
+                  _formKeys[_currentStep].currentState?.validate();
                 }
               },
               style: const TextStyle(
@@ -1698,7 +1696,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 suffixIcon: Icon(
                   Icons.calendar_month,
-                  color: AppColors.textDark.withOpacity(0.2),
+                  color: AppColors.deepAccent,
                   size: 18,
                 ),
                 filled: true,
@@ -1778,7 +1776,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           children: [
             DropdownButtonFormField<T>(
               value: value,
-              dropdownColor: Colors.white,
+              dropdownColor: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(16),
               itemHeight: 55,
               isExpanded: true,
@@ -1877,8 +1875,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryAccent
-                          : Colors.transparent,
+                          ? AppColors.secondaryAccent
+                          : AppColors.textPrimary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -1916,7 +1914,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.fieldBorder),
       ),
@@ -1930,7 +1928,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 style: const TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
-                  color: AppColors.textDark,
+                  color: AppColors.deepAccent,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -1942,13 +1940,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryAccent.withOpacity(0.1),
+                    color: AppColors.secondaryAccent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
                     'REQUIRED',
                     style: TextStyle(
-                      color: AppColors.primaryAccent,
+                      color: AppColors.secondaryAccent,
                       fontSize: 8,
                       fontWeight: FontWeight.w900,
                     ),
@@ -2044,65 +2042,115 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         ? _identityDocFileName
         : _otherDocFileName;
 
-    return InkWell(
-      onTap: () => _pickDocument(isIdentity),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        decoration: BoxDecoration(
-          color: AppColors.fieldBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: hasFile ? AppColors.primaryAccent : AppColors.fieldBorder,
-            style: BorderStyle.solid,
-            width: hasFile ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: hasFile ? AppColors.primaryAccent : Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: (hasFile ? AppColors.primaryAccent : Colors.black)
-                        .withOpacity(0.1),
-                    blurRadius: 10,
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () => _pickDocument(isIdentity),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.fieldBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: hasFile
+                    ? AppColors.secondaryAccent
+                    : AppColors.deepAccent,
+                style: BorderStyle.solid,
+                width: hasFile ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: hasFile
+                        ? AppColors.deepAccent
+                        : AppColors.deepAccent,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            (hasFile
+                                    ? AppColors.secondaryAccent
+                                    : AppColors.deepAccent)
+                                .withOpacity(0.3),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    hasFile ? Icons.check : Icons.upload_file,
+                    color: hasFile
+                        ? AppColors.textPrimary
+                        : AppColors.textPrimary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  hasFile ? fileName! : 'UPLOAD IMAGE / PDF',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: hasFile
+                        ? AppColors.secondaryAccent
+                        : AppColors.deepAccent,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                if (!hasFile) ...[
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Max size 2MB',
+                    style: TextStyle(
+                      color: AppColors.deepAccent,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
-              ),
-              child: Icon(
-                hasFile ? Icons.check : Icons.upload_file,
-                color: hasFile ? Colors.white : AppColors.textGrey,
-                size: 24,
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              hasFile ? fileName! : 'UPLOAD IMAGE / PDF',
-              style: TextStyle(
-                color: hasFile ? AppColors.primaryAccent : AppColors.textDark,
-                fontWeight: FontWeight.w900,
-                fontSize: 12,
-                letterSpacing: 0.5,
-              ),
-            ),
-            if (!hasFile) ...[
-              const SizedBox(height: 4),
-              const Text(
-                'Max size 2MB',
-                style: TextStyle(
-                  color: AppColors.textGrey,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (hasFile)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  if (isIdentity) {
+                    _identityDocBytes = null;
+                    _identityDocFileName = null;
+                    _identityDocBase64 = null;
+                    _identityDocExtension = null;
+                  } else {
+                    _otherDocBytes = null;
+                    _otherDocFileName = null;
+                    _otherDocBase64 = null;
+                    _otherDocExtension = null;
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: AppColors.deepAccent,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: AppColors.textPrimary,
+                  size: 16,
                 ),
               ),
-            ],
-          ],
-        ),
-      ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -2110,7 +2158,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Container(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textPrimary,
         border: Border(
           top: BorderSide(color: AppColors.fieldBorder.withOpacity(0.5)),
         ),
@@ -2124,7 +2172,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.textGrey,
+                  color: AppColors.deepAccent,
                   letterSpacing: 1,
                 ),
               ),
@@ -2135,7 +2183,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     width: 6,
                     height: 6,
                     decoration: const BoxDecoration(
-                      color: AppColors.primaryAccent,
+                      color: AppColors.secondaryAccent,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -2145,7 +2193,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.textDark,
+                      color: AppColors.deepAccent,
                       letterSpacing: 1,
                     ),
                   ),
@@ -2156,17 +2204,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           const SizedBox(height: 16),
           Consumer<StudentProvider>(
             builder: (context, provider, child) {
-              return SizedBox(
+              return Container(
                 width: double.infinity,
                 height: 56,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    colors: [AppColors.darkBg, AppColors.deepAccent],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.deepAccent.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
                 child: ElevatedButton(
                   onPressed: provider.isLoading ? null : _nextStep,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryAccent,
-                    disabledBackgroundColor: AppColors.primaryAccent
-                        .withOpacity(0.5),
-                    elevation: 8,
-                    shadowColor: AppColors.primaryAccent.withOpacity(0.3),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -2176,7 +2236,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: AppColors.textPrimary,
                             strokeWidth: 3,
                           ),
                         )
@@ -2185,10 +2245,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           children: [
                             Text(
                               _currentStep == _totalSteps - 1
-                                  ? 'COMPLETE REGISTRATION'
+                                  ? 'SUBMIT'
                                   : 'CONTINUE',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1,
@@ -2197,7 +2257,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             const SizedBox(width: 12),
                             const Icon(
                               Icons.arrow_forward,
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               size: 20,
                             ),
                           ],

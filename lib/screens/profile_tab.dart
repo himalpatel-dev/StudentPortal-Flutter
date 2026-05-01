@@ -34,7 +34,7 @@ class ProfileTab extends StatelessWidget {
                   SizedBox(height: 48 * scaleFactor),
 
                   // 01 / IDENTITY
-                  _buildContentSection('01', 'IDENTITY', 'PERSONAL DETAILS', [
+                  _buildContentSection('PERSONAL DETAILS', [
                     _buildDetailRow(
                       Icons.person_outline_rounded,
                       'FULL NAME',
@@ -68,7 +68,7 @@ class ProfileTab extends StatelessWidget {
                   ], scaleFactor),
 
                   // 02 / REACH
-                  _buildContentSection('02', 'REACH', 'CONTACT INFORMATION', [
+                  _buildContentSection('CONTACT INFORMATION', [
                     _buildDetailRow(
                       Icons.email_outlined,
                       'EMAIL ADDRESS',
@@ -90,7 +90,7 @@ class ProfileTab extends StatelessWidget {
                   ], scaleFactor),
 
                   // 03 / FAMILY
-                  _buildContentSection('03', 'FAMILY', 'PARENT & GUARDIAN', [
+                  _buildContentSection('PARENT & GUARDIAN', [
                     _buildDetailRow(
                       Icons.man_rounded,
                       "FATHER'S NAME",
@@ -106,7 +106,7 @@ class ProfileTab extends StatelessWidget {
                   ], scaleFactor),
 
                   // 04 / LOCATION
-                  _buildContentSection('04', 'LOCATION', 'ADDRESS DETAILS', [
+                  _buildContentSection('ADDRESS DETAILS', [
                     _buildDetailRow(
                       Icons.home_rounded,
                       'ADDRESS',
@@ -146,7 +146,7 @@ class ProfileTab extends StatelessWidget {
                   ], scaleFactor),
 
                   // 05 / AFFILIATION
-                  _buildContentSection('05', 'AFFILIATION', 'OTHER DETAILS', [
+                  _buildContentSection('OTHER DETAILS', [
                     _buildDetailRow(
                       Icons.groups_rounded,
                       'CLUB AFFILIATION',
@@ -172,9 +172,7 @@ class ProfileTab extends StatelessWidget {
   }
 
   Widget _buildContentSection(
-    String number,
     String label,
-    String title,
     List<Widget?> rows,
     double scaleFactor,
   ) {
@@ -183,7 +181,7 @@ class ProfileTab extends StatelessWidget {
 
     return Column(
       children: [
-        _buildSectionTitle(number, label, title, scaleFactor),
+        _buildSectionTitle(label, scaleFactor),
         _buildInfoCard(validRows, scaleFactor),
         SizedBox(height: 24 * scaleFactor),
       ],
@@ -303,13 +301,16 @@ class ProfileTab extends StatelessWidget {
                                       Icon(
                                         Icons.person,
                                         size: 60,
-                                        color: AppColors.textPrimary.withOpacity(0.24),
+                                        color: AppColors.textPrimary
+                                            .withOpacity(0.24),
                                       ),
                                 )
                               : Icon(
                                   Icons.person,
                                   size: 60,
-                                  color: AppColors.textPrimary.withOpacity(0.24),
+                                  color: AppColors.textPrimary.withOpacity(
+                                    0.24,
+                                  ),
                                 ),
                         ),
                       ),
@@ -357,21 +358,23 @@ class ProfileTab extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryAccent, // Fixed: Blue badge
+                          color: AppColors.textPrimary.withOpacity(
+                            0.1,
+                          ), // Fixed: Blue badge
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.check_circle_outline,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textPrimary.withOpacity(0.5),
                               size: 12,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               student.applicationStatus.toUpperCase(),
                               style: AppFonts.main(
-                                color: AppColors.textPrimary,
+                                color: AppColors.primaryAccent,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.5,
@@ -456,12 +459,12 @@ class ProfileTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 14, color: AppColors.primaryAccent),
+              Icon(icon, size: 14, color: AppColors.deepAccent),
               const SizedBox(width: 4),
               Text(
                 label,
                 style: AppFonts.main(
-                  color: AppColors.darkBg.withOpacity(0.26),
+                  color: AppColors.deepAccent,
                   fontSize: 9 * scaleFactor,
                   fontWeight: FontWeight.w900,
                 ),
@@ -483,7 +486,7 @@ class ProfileTab extends StatelessWidget {
                     text: ' $unit',
                     style: TextStyle(
                       fontSize: 10 * scaleFactor,
-                      color: AppColors.darkBg.withOpacity(0.26),
+                      color: AppColors.deepAccent,
                     ),
                   ),
               ],
@@ -494,29 +497,16 @@ class ProfileTab extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(
-    String number,
-    String label,
-    String title,
-    double scaleFactor,
-  ) {
+  Widget _buildSectionTitle(String label, double scaleFactor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              '$number  /  ',
-              style: AppFonts.main(
-                color: AppColors.primaryAccent, // Fixed: primary color
-                fontSize: 12 * scaleFactor,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            Text(
               label,
               style: AppFonts.main(
-                color: AppColors.darkBg.withOpacity(0.12),
+                color: AppColors.deepAccent.withOpacity(0.75),
                 fontSize: 12 * scaleFactor,
                 fontWeight: FontWeight.w900,
               ),
@@ -525,22 +515,12 @@ class ProfileTab extends StatelessWidget {
             Expanded(
               child: Container(
                 height: 1,
-                color: AppColors.darkBg.withOpacity(0.05),
+                color: AppColors.darkBg.withOpacity(0.35),
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        Text(
-          title,
-          style: AppFonts.heading(
-            color: AppColors.darkBg,
-            fontSize: 22 * scaleFactor,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 16),
       ],
     );
   }
@@ -618,7 +598,11 @@ class ProfileTab extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, size: 20, color: AppColors.deepAccent.withOpacity(0.8)),
+            child: Icon(
+              icon,
+              size: 20,
+              color: AppColors.deepAccent.withOpacity(0.8),
+            ),
           ),
           SizedBox(width: 16 * scaleFactor),
           Expanded(
