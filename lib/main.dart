@@ -9,6 +9,8 @@ import 'package:student_portal/screens/login_screen.dart';
 import 'package:student_portal/screens/home_page.dart';
 import 'package:student_portal/utils/app_fonts.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
@@ -31,6 +33,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TournamentProvider()),
       ],
       child: MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
         title: 'Student Portal',
         debugShowCheckedModeBanner: false,
         theme: ThemeData.dark().copyWith(

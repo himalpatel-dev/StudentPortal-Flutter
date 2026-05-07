@@ -203,7 +203,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                   height: 32,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.black,
+                                    color: AppColors.deepAccent,
                                   ),
                                   child: const Icon(
                                     Icons.key_rounded,

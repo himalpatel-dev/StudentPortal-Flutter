@@ -352,37 +352,7 @@ class ProfileTab extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.textPrimary.withOpacity(
-                            0.1,
-                          ), // Fixed: Blue badge
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              color: AppColors.textPrimary.withOpacity(0.5),
-                              size: 12,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              student.applicationStatus.toUpperCase(),
-                              style: AppFonts.main(
-                                color: AppColors.primaryAccent,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      _buildStatusBadge(student.applicationStatus),
                     ],
                   ),
                 ],
@@ -587,7 +557,7 @@ class ProfileTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.textPrimary,
+              color: AppColors.secondaryAccent.withOpacity(0.1),
               borderRadius: BorderRadius.circular(15),
               border: Border.all(color: AppColors.darkBg.withOpacity(0.03)),
               boxShadow: [
@@ -598,11 +568,7 @@ class ProfileTab extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppColors.deepAccent.withOpacity(0.8),
-            ),
+            child: Icon(icon, size: 20, color: AppColors.secondaryAccent),
           ),
           SizedBox(width: 16 * scaleFactor),
           Expanded(
@@ -648,5 +614,51 @@ class ProfileTab extends StatelessWidget {
     } catch (e) {
       return dateString;
     }
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color statusColor;
+    final normalizedStatus = status.toUpperCase();
+
+    if (normalizedStatus == 'APPROVED') {
+      statusColor = AppColors.success;
+    } else if (normalizedStatus == 'REJECTED') {
+      statusColor = AppColors.error;
+    } else {
+      statusColor = const Color(0xFFF59E0B); // Amber/Yellow
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            normalizedStatus == 'APPROVED'
+                ? Icons.verified_rounded
+                : normalizedStatus == 'REJECTED'
+                ? Icons.cancel_rounded
+                : Icons.pending_rounded,
+            color: statusColor,
+            size: 12,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            status.toUpperCase(),
+            style: AppFonts.main(
+              color: statusColor,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

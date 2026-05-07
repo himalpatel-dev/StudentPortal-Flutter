@@ -5,13 +5,14 @@ import 'package:student_portal/providers/student_provider.dart';
 import 'package:student_portal/providers/tournament_provider.dart';
 import 'package:student_portal/models/tournament.dart';
 import 'package:student_portal/models/student_stats.dart';
-import 'package:student_portal/models/fixture.dart';
 import 'package:student_portal/screens/profile_tab.dart';
 import 'package:student_portal/screens/fixture_details_screen.dart';
 import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/utils/app_fonts.dart';
 import 'package:student_portal/models/student.dart';
 import 'package:student_portal/widgets/athlete_id_card.dart';
+import 'package:student_portal/screens/career_archive_screen.dart';
+import 'package:student_portal/main.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,8 +45,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: Consumer<StudentProvider>(
-        builder: (context, studentProvider, child) {
+      body: Consumer2<StudentProvider, TournamentProvider>(
+        builder: (context, studentProvider, tournamentProvider, child) {
           if (studentProvider.isLoading && studentProvider.student == null) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -55,12 +56,24 @@ class _HomePageState extends State<HomePage> {
             return const Center(child: Text('Failed to load profile'));
           }
 
-          return IndexedStack(
-            index: _selectedNavIndex,
+          return Stack(
             children: [
-              _buildHomeContent(studentProvider),
-              AthleteIdCard(student: student),
-              ProfileTab(student: student),
+              IndexedStack(
+                index: _selectedNavIndex,
+                children: [
+                  _buildHomeContent(studentProvider),
+                  const CareerArchiveScreen(),
+                  AthleteIdCard(student: student),
+                  ProfileTab(student: student),
+                ],
+              ),
+              if (tournamentProvider.isApplying)
+                Container(
+                  color: Colors.black45,
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
             ],
           );
         },
@@ -102,6 +115,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.badge_outlined),
@@ -261,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                                     shape: BoxShape.circle,
                                   ),
                                 ),
-                                Container(
+                                Flexible(
                                   child: _buildSmallBadge(
                                     student.clubAffiliation,
                                     AppColors.primaryAccent.withOpacity(0.1),
@@ -588,7 +606,7 @@ class _HomePageState extends State<HomePage> {
                           Row(
                             children: [
                               const Icon(
-                                Icons.calendar_today_rounded,
+                                Icons.calendar_month_outlined,
                                 color: AppColors.primaryAccent,
                                 size: 14,
                               ),
@@ -604,28 +622,29 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
+                          if (daysLeft > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                ),
+                              ),
+                              child: Text(
+                                '$daysLeft DAYS',
+                                style: AppFonts.main(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
-                            child: Text(
-                              '$daysLeft DAYS',
-                              style: AppFonts.main(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -754,13 +773,29 @@ class _HomePageState extends State<HomePage> {
                             );
                           }
                         : () async {
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
+                            if (student.applicationStatus.toUpperCase() !=
+                                'APPROVED') {
+                              scaffoldMessengerKey.currentState
+                                  ?.hideCurrentSnackBar();
+                              scaffoldMessengerKey.currentState?.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'You cannot apply. Your approval is ${student.applicationStatus.toLowerCase()}.',
+                                    style: AppFonts.main(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(20),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
 
                             final provider = Provider.of<TournamentProvider>(
                               context,
@@ -774,7 +809,6 @@ class _HomePageState extends State<HomePage> {
                                 );
 
                             if (context.mounted) {
-                              Navigator.pop(context); // Close loading dialog
                               if (matchResult != null) {
                                 final matchedCategory = matchResult['match'];
                                 final allCategories =
@@ -814,7 +848,7 @@ class _HomePageState extends State<HomePage> {
     Map<String, dynamic>? matchedCategory,
     List<dynamic> allCategories,
   ) {
-    int? selectedCategoryId = matchedCategory?['category_division_id'];
+    int? selectedCategoryId = int.tryParse(matchedCategory?['category_division_id']?.toString() ?? '');
 
     showModalBottomSheet(
       context: context,
@@ -822,7 +856,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (sheetContext, setSheetState) {
             return Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -917,7 +951,8 @@ class _HomePageState extends State<HomePage> {
                       left: 24,
                       right: 24,
                       top: 24,
-                      bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                      bottom:
+                          MediaQuery.of(sheetContext).viewInsets.bottom + 24,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1013,11 +1048,15 @@ class _HomePageState extends State<HomePage> {
                               items: allCategories.map<DropdownMenuItem<int>>((
                                 cat,
                               ) {
-                                final bool isSelected =
-                                    cat['category_division_id'] ==
-                                    selectedCategoryId;
-                                return DropdownMenuItem<int>(
-                                  value: cat['category_division_id'],
+                                  final int catId = int.tryParse(
+                                        cat['category_division_id']?.toString() ??
+                                        '',
+                                      ) ??
+                                      0;
+                                  final bool isSelected =
+                                      catId == selectedCategoryId;
+                                  return DropdownMenuItem<int>(
+                                    value: catId,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -1069,7 +1108,7 @@ class _HomePageState extends State<HomePage> {
                                 );
                               }).toList(),
                               onChanged: (int? newValue) {
-                                setState(() {
+                                setSheetState(() {
                                   selectedCategoryId = newValue;
                                 });
                               },
@@ -1098,12 +1137,50 @@ class _HomePageState extends State<HomePage> {
                           child: ElevatedButton(
                             onPressed: selectedCategoryId == null
                                 ? null
-                                : () {
-                                    Navigator.pop(context);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                : () async {
+                                    // Close bottom sheet using its own context
+                                    Navigator.pop(sheetContext);
+
+                                    final provider =
+                                        Provider.of<TournamentProvider>(
+                                          context,
+                                          listen: false,
+                                        );
+
+                                    final success = await provider
+                                        .applyToTournament(
+                                          tournamentId:
+                                              int.tryParse(
+                                                tournament.tournamentId,
+                                              ) ??
+                                              0,
+                                          studentId: student.id,
+                                          categoryId: selectedCategoryId!,
+                                        );
+
+                                    scaffoldMessengerKey.currentState
+                                        ?.hideCurrentSnackBar();
+                                    scaffoldMessengerKey.currentState?.showSnackBar(
+                                      SnackBar(
                                         content: Text(
-                                          'Application request pending API implementation',
+                                          success
+                                              ? 'Applied for tournament successfully!'
+                                              : (provider.errorMessage ??
+                                                    'Failed to submit application'),
+                                          style: AppFonts.main(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        backgroundColor: success
+                                            ? Colors.green
+                                            : Colors.red,
+                                        behavior: SnackBarBehavior.floating,
+                                        margin: const EdgeInsets.all(20),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                       ),
                                     );
@@ -1349,13 +1426,17 @@ class _HomePageState extends State<HomePage> {
         children: [
           Icon(icon, size: fontSize + 2, color: textColor),
           SizedBox(width: fontSize * 0.5),
-          Text(
-            text,
-            style: AppFonts.main(
-              fontSize: fontSize,
-              fontWeight: FontWeight.w900,
-              color: textColor,
-              letterSpacing: 0.5,
+          Flexible(
+            child: Text(
+              text,
+              style: AppFonts.main(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w900,
+                color: textColor,
+                letterSpacing: 0.5,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -1406,212 +1487,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSecondaryActionButton(String text, IconData icon) {
-    return Container(
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.black.withOpacity(0.08), width: 1.5),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(22),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.black, size: 18),
-              const SizedBox(width: 10),
-              Text(
-                text,
-                style: AppFonts.main(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFixtureCard(Fixture fixture) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Match Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.withOpacity(0.1)),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      fixture.matchName.toUpperCase(),
-                      style: AppFonts.heading(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      'ROUND ${fixture.roundNo}',
-                      style: AppFonts.main(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryAccent,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: fixture.matchStatus == 'SCHEDULED'
-                        ? Colors.blue.withOpacity(0.1)
-                        : Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    fixture.matchStatus,
-                    style: AppFonts.main(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: fixture.matchStatus == 'SCHEDULED'
-                          ? Colors.blue
-                          : Colors.green,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Details Grid
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                _buildFixtureRow(
-                  Icons.track_changes_rounded,
-                  'CATEGORY',
-                  fixture.categoryName,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildFixtureRow(
-                        Icons.grid_view_rounded,
-                        'RING NO',
-                        fixture.ringNo.toString(),
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildFixtureRow(
-                        Icons.layers_rounded,
-                        'POOL NO',
-                        fixture.poolNo,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildFixtureRow(
-                        Icons.calendar_today_rounded,
-                        'DATE',
-                        fixture.matchDate,
-                      ),
-                    ),
-                    Expanded(
-                      child: _buildFixtureRow(
-                        Icons.access_time_rounded,
-                        'REPORTING',
-                        fixture.reportingTime,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFixtureRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, size: 16, color: Colors.black54),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: AppFonts.main(
-                fontSize: 8,
-                fontWeight: FontWeight.w900,
-                color: Colors.black26,
-                letterSpacing: 0.5,
-              ),
-            ),
-            Text(
-              value,
-              style: AppFonts.heading(
-                fontSize: 13,
-                fontWeight: FontWeight.w900,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -1707,6 +1582,7 @@ class CardLinesPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     const spacing = 12.0;
+
     for (double i = 0; i < size.width + size.height; i += spacing) {
       canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
     }

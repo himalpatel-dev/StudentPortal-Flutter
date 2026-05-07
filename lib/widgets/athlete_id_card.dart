@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:student_portal/models/student.dart';
 import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/utils/app_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class AthleteIdCard extends StatefulWidget {
   final Student student;
@@ -138,8 +139,6 @@ class _AthleteIdCardState extends State<AthleteIdCard>
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Removed pattern for a cleaner solid look
-          const SizedBox.shrink(),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 30, 24, 0),
             child: Column(
@@ -273,7 +272,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '',
+                    'TAP TO FLIP',
                     style: AppFonts.main(
                       fontSize: 10,
                       color: AppColors.textPrimary.withOpacity(0.4),
@@ -326,7 +325,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'ATHLETE PROFILE',
+                      'VERIFY IDENTITY',
                       style: AppFonts.main(
                         fontSize: 10,
                         color: AppColors.secondaryAccent,
@@ -367,125 +366,59 @@ class _AthleteIdCardState extends State<AthleteIdCard>
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // 01 / IDENTITY
-                    _buildDataSection('PERSONAL DETAILS', [
-                      _buildDataItem(
-                        Icons.person_outline_rounded,
-                        'FULL NAME',
-                        widget.student.fullName,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: QrImageView(
+                      data:
+                          'https://athlete-portal.com/verify/${widget.student.id}',
+                      version: QrVersions.auto,
+                      size: 220.0,
+                      gapless: false,
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: AppColors.darkBg,
                       ),
-                      _buildDataItem(
-                        Icons.wc_rounded,
-                        'GENDER',
-                        widget.student.gender,
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: AppColors.darkBg,
                       ),
-                      _buildDataItem(
-                        Icons.cake_outlined,
-                        'DATE OF BIRTH',
-                        _formatDate(widget.student.dob),
-                      ),
-                      _buildDataItem(
-                        Icons.calendar_today_rounded,
-                        'AGE',
-                        widget.student.age > 0
-                            ? '${widget.student.age} Years'
-                            : '',
-                      ),
-                      _buildDataItem(
-                        Icons.fingerprint_rounded,
-                        'AADHAR NUMBER',
-                        widget.student.aadharNumber,
-                      ),
-                    ]),
-                    const SizedBox(height: 24),
-                    // 02 / REACH
-                    _buildDataSection('CONTACT INFORMATION', [
-                      _buildDataItem(
-                        Icons.email_outlined,
-                        'EMAIL ADDRESS',
-                        widget.student.email.toLowerCase(),
-                      ),
-                      _buildDataItem(
-                        Icons.phone_iphone_rounded,
-                        'MOBILE NUMBER',
-                        widget.student.contactNumber,
-                      ),
-                      _buildDataItem(
-                        Icons.emergency_outlined,
-                        'EMERGENCY CONTACT',
-                        widget.student.emergencyContact,
-                      ),
-                    ]),
-                    const SizedBox(height: 24),
-                    // 03 / FAMILY
-                    _buildDataSection('PARENT & GUARDIAN', [
-                      _buildDataItem(
-                        Icons.man_rounded,
-                        "FATHER'S NAME",
-                        widget.student.fatherName,
-                      ),
-                      _buildDataItem(
-                        Icons.woman_rounded,
-                        "MOTHER'S NAME",
-                        widget.student.motherName,
-                      ),
-                    ]),
-                    const SizedBox(height: 24),
-                    // 04 / LOCATION
-                    _buildDataSection('ADDRESS DETAILS', [
-                      _buildDataItem(
-                        Icons.home_rounded,
-                        'ADDRESS',
-                        widget.student.address,
-                      ),
-                      _buildDataItem(
-                        Icons.location_city_rounded,
-                        'CITY',
-                        widget.student.city,
-                      ),
-                      _buildDataItem(
-                        Icons.map_rounded,
-                        'DISTRICT',
-                        widget.student.district,
-                      ),
-                      _buildDataItem(
-                        Icons.explore_rounded,
-                        'STATE',
-                        widget.student.state,
-                      ),
-                      _buildDataItem(
-                        Icons.public_rounded,
-                        'COUNTRY',
-                        widget.student.country,
-                      ),
-                      _buildDataItem(
-                        Icons.pin_drop_rounded,
-                        'PINCODE',
-                        widget.student.pincode,
-                      ),
-                    ]),
-                    const SizedBox(height: 24),
-                    // 05 / AFFILIATION
-                    _buildDataSection('OTHER DETAILS', [
-                      _buildDataItem(
-                        Icons.groups_rounded,
-                        'CLUB AFFILIATION',
-                        widget.student.clubAffiliation,
-                      ),
-                      _buildDataItem(
-                        Icons.verified_user_rounded,
-                        'MEMBER SINCE',
-                        _formatDate(widget.student.sopApprovalDate),
-                      ),
-                    ]),
-                    const SizedBox(height: 10),
-                  ],
-                ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'SCAN TO VERIFY ATHLETE',
+                    style: AppFonts.main(
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Official Digital Identity',
+                    style: AppFonts.main(
+                      fontSize: 10,
+                      color: AppColors.textGrey.withOpacity(0.6),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -513,28 +446,25 @@ class _AthleteIdCardState extends State<AthleteIdCard>
     );
   }
 
-  String _formatDate(String dateStr) {
-    if (dateStr.isEmpty) return '';
-    try {
-      if (dateStr.contains(' ')) {
-        return dateStr.split(' ').first;
-      }
-      if (dateStr.contains('T')) {
-        return dateStr.split('T').first;
-      }
-      return dateStr;
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
   Widget _buildActiveBadge(String status) {
+    Color statusColor;
+    final normalizedStatus = status.toUpperCase();
+
+    if (normalizedStatus == 'APPROVED') {
+      statusColor = AppColors.success;
+    } else if (normalizedStatus == 'REJECTED') {
+      statusColor = AppColors.error;
+    } else {
+      // Pending or other states
+      statusColor = const Color(0xFFF59E0B); // Amber/Yellow
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.1),
+        color: statusColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.success.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -542,8 +472,8 @@ class _AthleteIdCardState extends State<AthleteIdCard>
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
-              color: AppColors.success,
+            decoration: BoxDecoration(
+              color: statusColor,
               shape: BoxShape.circle,
             ),
           ),
@@ -552,7 +482,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
             status.toUpperCase(),
             style: AppFonts.main(
               fontSize: 10,
-              color: AppColors.success,
+              color: statusColor,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -595,100 +525,6 @@ class _AthleteIdCardState extends State<AthleteIdCard>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDataSection(String title, List<Widget> items) {
-    final validItems = items.where((item) => item is! SizedBox).toList();
-    if (validItems.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(width: 3, height: 14, color: AppColors.primaryAccent),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: AppFonts.main(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(child: Divider(thickness: 1)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.surfaceDark),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withOpacity(0.02),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(children: validItems),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDataItem(IconData icon, String label, String value) {
-    if (value.trim().isEmpty || value.trim().toLowerCase() == 'null') {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryAccent.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: AppColors.deepAccent.withOpacity(0.8),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppFonts.main(
-                    fontSize: 10,
-                    color: AppColors.textGrey.withOpacity(0.8),
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: AppFonts.heading(
-                    fontSize: 16,
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

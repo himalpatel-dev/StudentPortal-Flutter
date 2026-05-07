@@ -1,4 +1,4 @@
-package com.example.student_portal
+package com.responscity.studentportal
 
 import io.flutter.embedding.android.FlutterActivity
 

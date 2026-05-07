@@ -8,7 +8,7 @@
 PRODUCT_NAME = student_portal
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.studentPortal
+PRODUCT_BUNDLE_IDENTIFIER = com.responscity.studentportal
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.responscity. All rights reserved.

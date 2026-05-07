@@ -149,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 32 * scaleFactor,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.black,
+                                    color: AppColors.deepAccent,
                                   ),
                                   child: Icon(
                                     Icons.smartphone_rounded,

@@ -60,15 +60,8 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
 
                   final sortedFixtures = List.from(provider.fixtureDetails);
                   sortedFixtures.sort((a, b) {
-                    if (a.matchStatus.toLowerCase() == 'scheduled' &&
-                        b.matchStatus.toLowerCase() != 'scheduled') {
-                      return -1;
-                    }
-                    if (a.matchStatus.toLowerCase() != 'scheduled' &&
-                        b.matchStatus.toLowerCase() == 'scheduled') {
-                      return 1;
-                    }
-                    return 0;
+                    // Sort by round number descending (Latest round first)
+                    return b.roundNo.compareTo(a.roundNo);
                   });
 
                   final scheduled = sortedFixtures
@@ -299,18 +292,6 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeaderIconButton(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Icon(icon, color: Colors.white, size: 20),
     );
   }
 

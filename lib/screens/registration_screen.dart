@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:student_portal/providers/student_provider.dart';
 import 'dart:convert';
-import 'dart:math';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
+import 'dart:math';
 import 'package:student_portal/utils/app_colors.dart';
+import 'package:student_portal/models/master.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -25,9 +26,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   );
 
   // Controllers for all form fields
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _middleNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _aadharController = TextEditingController();
@@ -52,6 +51,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       TextEditingController();
   final TextEditingController _otherDocNameController = TextEditingController();
   final TextEditingController _otherDocNumberController =
+      TextEditingController();
+  final TextEditingController _beltDocNumberController =
+      TextEditingController();
+  final TextEditingController _medicalDocNumberController =
       TextEditingController();
 
   String _selectedGender = 'Male';
@@ -85,6 +88,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String? _otherDocFileName;
   String? _otherDocBase64;
   String? _otherDocExtension;
+
+  int? _selectedBeltDocId;
+  String? _selectedBeltDocName;
+  Uint8List? _beltDocBytes;
+  String? _beltDocFileName;
+  String? _beltDocBase64;
+  String? _beltDocExtension;
+
+  int? _medicalDocId;
+  String? _medicalDocName;
+  Uint8List? _medicalDocBytes;
+  String? _medicalDocFileName;
+  String? _medicalDocBase64;
+  String? _medicalDocExtension;
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(
@@ -126,9 +143,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _firstNameController.dispose();
-    _middleNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.dispose();
     _dobController.dispose();
     _ageController.dispose();
     _aadharController.dispose();
@@ -146,6 +161,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _identityDocNumberController.dispose();
     _otherDocNameController.dispose();
     _otherDocNumberController.dispose();
+    _beltDocNumberController.dispose();
+    _medicalDocNumberController.dispose();
     super.dispose();
   }
 
@@ -179,9 +196,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final randomSuffix = (10000 + random.nextInt(89999)).toString();
 
     setState(() {
-      _firstNameController.text = "John";
-      _middleNameController.text = "D";
-      _lastNameController.text = "Doe_${randomSuffix.substring(0, 3)}";
+      _fullNameController.text = "John Doe ${randomSuffix.substring(0, 3)}";
       _selectedGender = 'Male';
       _dobController.text = "2005-05-15";
       _ageController.text = "19";
@@ -206,7 +221,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final provider = Provider.of<StudentProvider>(context, listen: false);
 
     if (provider.countries.isNotEmpty) {
-      final country = provider.countries.first;
+      final country = provider.countries.firstWhere(
+        (c) => c.id == 1,
+        orElse: () => provider.countries.first,
+      );
       setState(() {
         _selectedCountryId = country.id;
         _selectedCountryName = country.name;
@@ -217,7 +235,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
       await provider.fetchStates(country.id);
       if (provider.states.isNotEmpty) {
-        final state = provider.states.first;
+        final state = provider.states.firstWhere(
+          (s) => s.id == 1,
+          orElse: () => provider.states.first,
+        );
         setState(() {
           _selectedStateId = state.id;
           _selectedStateName = state.name;
@@ -225,7 +246,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
         await provider.fetchDistricts(state.id);
         if (provider.districts.isNotEmpty) {
-          final district = provider.districts.first;
+          final district = provider.districts.firstWhere(
+            (d) => d.id == 40,
+            orElse: () => provider.districts.first,
+          );
           setState(() {
             _selectedDistrictId = district.id;
             _selectedDistrictName = district.name;
@@ -233,7 +257,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
           await provider.fetchCities(district.id);
           if (provider.cities.isNotEmpty) {
-            final city = provider.cities.first;
+            final city = provider.cities.firstWhere(
+              (c) => c.id == 83,
+              orElse: () => provider.cities.first,
+            );
             setState(() {
               _selectedCityId = city.id;
               _selectedCityName = city.name;
@@ -247,7 +274,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final identityDocs = provider.requiredDocuments
           .where((d) => d.isActive && d.isIdentityDoc)
           .toList();
-      final otherDocs = provider.requiredDocuments
+      provider.requiredDocuments
           .where((d) => d.isActive && !d.isIdentityDoc)
           .toList();
 
@@ -261,8 +288,61 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           _identityDocExtension = "jpeg";
         }
 
-        if (otherDocs.isNotEmpty) {
-          final doc = otherDocs.first;
+        // Find a Belt doc for demo
+        final beltDocs = provider.requiredDocuments.where((d) {
+          if (!d.isActive || d.isIdentityDoc) return false;
+          final parts = d.name.split(' ');
+          if (parts.length > 2) {
+            for (int i = 1; i < parts.length - 1; i++) {
+              if (parts[i].toLowerCase() == 'belt') return true;
+            }
+          }
+          return false;
+        }).toList();
+
+        if (beltDocs.isNotEmpty) {
+          final doc = beltDocs.first;
+          _selectedBeltDocId = doc.id;
+          _selectedBeltDocName = doc.name;
+          _beltDocNumberController.text = "BELT-$randomSuffix";
+          _beltDocBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
+          _beltDocExtension = "jpeg";
+        }
+
+        // Find Medical doc for demo
+        final medicalDoc = provider.requiredDocuments.where((d) {
+          return d.isActive &&
+              !d.isIdentityDoc &&
+              d.name.toLowerCase().startsWith('medical');
+        }).firstOrNull;
+
+        if (medicalDoc != null) {
+          _medicalDocId = medicalDoc.id;
+          _medicalDocName = medicalDoc.name;
+          _medicalDocNumberController.text = "MED-$randomSuffix";
+          _medicalDocBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
+          _medicalDocExtension = "jpeg";
+        }
+
+        final otherDocsFiltered = provider.requiredDocuments.where((d) {
+          if (!d.isActive || d.isIdentityDoc) return false;
+          if (d.name.toLowerCase().startsWith('medical')) return false;
+          final parts = d.name.split(' ');
+          bool isBelt = false;
+          if (parts.length > 2) {
+            for (int i = 1; i < parts.length - 1; i++) {
+              if (parts[i].toLowerCase() == 'belt') {
+                isBelt = true;
+                break;
+              }
+            }
+          }
+          if (isBelt) return false;
+          return true;
+        }).toList();
+
+        if (otherDocsFiltered.isNotEmpty) {
+          final doc = otherDocsFiltered.first;
           _selectedOtherDocId = doc.id;
           _selectedOtherDocName = doc.name;
           _otherDocNameController.text = "Demo Certificate";
@@ -289,9 +369,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Future<void> _submitRegistration() async {
     final Map<String, dynamic> studentData = {
-      "first_name": _firstNameController.text,
-      "middle_name": _middleNameController.text,
-      "last_name": _lastNameController.text,
+      "first_name": _fullNameController.text,
+      "middle_name": "",
+      "last_name": "",
       "gender": _selectedGender,
       "dob": _dobController.text,
       "date_of_birth": _dobController.text,
@@ -331,6 +411,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             "document_number": _identityDocNumberController.text,
             "doc_file_ext": _identityDocExtension,
           },
+        if (_beltDocBase64 != null)
+          {
+            "doc_id": 0,
+            "is_active": true,
+            "uuid": null,
+            "doc_file_name": _beltDocBase64,
+            "doc_content_type": _beltDocExtension == 'pdf'
+                ? "application/pdf"
+                : "image/jpeg",
+            "doc_type": null,
+            "document_type_id": _selectedBeltDocId,
+            "document_type_name": _selectedBeltDocName,
+            "document_number": _beltDocNumberController.text,
+            "doc_file_ext": _beltDocExtension,
+          },
+        if (_medicalDocBase64 != null)
+          {
+            "doc_id": 0,
+            "is_active": true,
+            "uuid": null,
+            "doc_file_name": _medicalDocBase64,
+            "doc_content_type": _medicalDocExtension == 'pdf'
+                ? "application/pdf"
+                : "image/jpeg",
+            "doc_type": null,
+            "document_type_id": _medicalDocId,
+            "document_type_name": _medicalDocName,
+            "document_number": _medicalDocNumberController.text,
+            "doc_file_ext": _medicalDocExtension,
+          },
         if (_otherDocBase64 != null)
           {
             "doc_id": 0,
@@ -342,9 +452,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 : "image/jpeg",
             "doc_type": null,
             "document_type_id": _selectedOtherDocId,
-            "document_type_name": _otherDocNameController.text.isNotEmpty
-                ? _otherDocNameController.text
-                : _selectedOtherDocName,
+            "document_type_name": _selectedOtherDocName,
             "document_number": _otherDocNumberController.text,
             "doc_file_ext": _otherDocExtension,
           },
@@ -376,7 +484,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             backgroundColor: AppColors.success,
           ),
         );
-        Navigator.of(context).pop();
+        // Navigator.of(context).pop();
       }
     } else {
       if (mounted) {
@@ -424,29 +532,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                         const SizedBox(height: 24),
                         _buildFieldLabelWrapper(
-                          'FIRST NAME',
+                          'FULL NAME',
                           _buildModernTextField(
-                            _firstNameController,
-                            'First Name',
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Required' : null,
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'MIDDLE NAME',
-                          _buildModernTextField(
-                            _middleNameController,
-                            'Middle Name',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'LAST NAME',
-                          _buildModernTextField(
-                            _lastNameController,
-                            'Last Name',
+                            _fullNameController,
+                            'Full Name',
                             validator: (v) =>
                                 v == null || v.isEmpty ? 'Required' : null,
                           ),
@@ -891,12 +980,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         const SizedBox(height: 32),
                         _buildModernDocumentCard(
                           title: 'IDENTITY DOCUMENT',
-                          isIdentity: true,
+                          type: 'identity',
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernDocumentCard(
+                          title: 'BELT CERTIFICATE',
+                          type: 'belt',
+                        ),
+                        const SizedBox(height: 16),
+                        _buildModernDocumentCard(
+                          title: 'MEDICAL CERTIFICATE',
+                          type: 'medical',
                         ),
                         const SizedBox(height: 16),
                         _buildModernDocumentCard(
                           title: 'OTHER DOCUMENTS',
-                          isIdentity: false,
+                          type: 'other',
                         ),
                       ],
                     ),
@@ -967,27 +1066,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   const Spacer(),
 
-                  // InkWell(
-                  //   onTap: _fillDemoData,
-                  //   borderRadius: BorderRadius.circular(14),
-                  //   child: Container(
-                  //     width: 44,
-                  //     height: 44,
-                  //     decoration: BoxDecoration(
-                  //       color: AppColors.primaryAccent.withOpacity(0.2),
-                  //       borderRadius: BorderRadius.circular(14),
-                  //       border: Border.all(
-                  //         color: AppColors.primaryAccent.withOpacity(0.3),
-                  //         width: 1,
-                  //       ),
-                  //     ),
-                  //     child: const Icon(
-                  //       Icons.auto_fix_high,
-                  //       color: Colors.white,
-                  //       size: 20,
-                  //     ),
-                  //   ),
-                  // ),
+                  InkWell(
+                    onTap: _fillDemoData,
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryAccent.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: AppColors.primaryAccent.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.auto_fix_high,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
                   //const Spacer(),
                 ],
               ),
@@ -1909,7 +2008,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Widget _buildModernDocumentCard({
     required String title,
-    required bool isIdentity,
+    required String type,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1933,7 +2032,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
               ),
               const Spacer(),
-              if (isIdentity)
+              if (type == 'identity')
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -1957,95 +2056,186 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           const SizedBox(height: 20),
           Consumer<StudentProvider>(
             builder: (context, provider, child) {
-              final docs = isIdentity
-                  ? provider.requiredDocuments
-                        .where((d) => d.isActive && d.isIdentityDoc)
-                        .toList()
-                  : provider.requiredDocuments
-                        .where((d) => d.isActive && !d.isIdentityDoc)
-                        .toList();
+              List<RequiredDocument> docs = [];
+              if (type == 'identity') {
+                docs = provider.requiredDocuments
+                    .where((d) => d.isActive && d.isIdentityDoc)
+                    .toList();
+              } else if (type == 'belt') {
+                docs = provider.requiredDocuments.where((d) {
+                  if (!d.isActive || d.isIdentityDoc) return false;
+                  final parts = d.name.split(' ');
+                  // "White Belt Certificate" -> ["White", "Belt", "Certificate"]
+                  // We check if "Belt" or "belt" is in the middle (not first, not last)
+                  if (parts.length > 2) {
+                    for (int i = 1; i < parts.length - 1; i++) {
+                      if (parts[i].toLowerCase() == 'belt') return true;
+                    }
+                  }
+                  return false;
+                }).toList();
+              } else if (type == 'medical') {
+                // Find the medical certificate doc from the list
+                final medicalDocs = provider.requiredDocuments.where((d) {
+                  return d.isActive &&
+                      !d.isIdentityDoc &&
+                      d.name.toLowerCase().startsWith('medical');
+                }).toList();
+                final medicalDoc = medicalDocs.isNotEmpty
+                    ? medicalDocs.first
+                    : null;
+
+                if (medicalDoc != null) {
+                  final mId = medicalDoc.id;
+                  final mName = medicalDoc.name;
+                  // We don't show a dropdown for medical, we just set the ID
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_medicalDocId != mId) {
+                      setState(() {
+                        _medicalDocId = mId;
+                        _medicalDocName = mName;
+                      });
+                    }
+                  });
+                  // User requested to hide this field
+                  return const SizedBox.shrink();
+                } else {
+                  return const SizedBox.shrink();
+                }
+              } else if (type == 'other') {
+                // Find the other document doc from the list
+                final otherDocs = provider.requiredDocuments.where((d) {
+                  return d.isActive &&
+                      !d.isIdentityDoc &&
+                      !d.name.toLowerCase().startsWith('medical') &&
+                      !d.name.toLowerCase().contains('belt');
+                }).toList();
+                final otherDoc = otherDocs.isNotEmpty ? otherDocs.first : null;
+
+                if (otherDoc != null) {
+                  final oId = otherDoc.id;
+                  final oName = otherDoc.name;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_selectedOtherDocId != oId) {
+                      setState(() {
+                        _selectedOtherDocId = oId;
+                        _selectedOtherDocName = oName;
+                      });
+                    }
+                  });
+                  // User requested to hide this field
+                  return const SizedBox.shrink();
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }
+
+              if (type == 'medical' || type == 'other') {
+                return const SizedBox.shrink();
+              }
+
               return _buildFieldLabelWrapper(
                 'TYPE',
                 _buildModernDropdown<int>(
-                  value: isIdentity
+                  value: type == 'identity'
                       ? _selectedIdentityDocId
-                      : _selectedOtherDocId,
+                      : (type == 'belt'
+                            ? _selectedBeltDocId
+                            : _selectedOtherDocId),
                   options: docs.map((d) => d.id).toList(),
                   getTitle: (id) => docs.firstWhere((d) => d.id == id).name,
-                  validator: isIdentity
+                  validator: type == 'identity'
                       ? (v) => v == null ? 'Required' : null
                       : null,
                   onChanged: (val) {
+                    if (val == null) return;
+                    final int selectedId = val;
                     setState(() {
-                      if (isIdentity) {
-                        _selectedIdentityDocId = val;
-                        final docName = docs
-                            .firstWhere((d) => d.id == val)
-                            .name;
-                        _selectedIdentityDocName = docName;
-                        if (docName.toLowerCase().contains('aadhar')) {
-                          _identityDocNumberController.text =
-                              _aadharController.text;
-                        } else {
-                          _identityDocNumberController.clear();
+                      RequiredDocument? foundDoc;
+                      for (var d in docs) {
+                        if (d.id == selectedId) {
+                          foundDoc = d;
+                          break;
                         }
-                      } else {
-                        _selectedOtherDocId = val;
-                        _selectedOtherDocName = docs
-                            .firstWhere((d) => d.id == val)
-                            .name;
+                      }
+
+                      if (type == 'identity') {
+                        _selectedIdentityDocId = selectedId;
+                        if (foundDoc != null) {
+                          _selectedIdentityDocName = foundDoc.name;
+                          if (foundDoc.name.toLowerCase().contains('aadhar')) {
+                            _identityDocNumberController.text =
+                                _aadharController.text;
+                          } else {
+                            _identityDocNumberController.clear();
+                          }
+                        }
+                      } else if (type == 'belt') {
+                        _selectedBeltDocId = selectedId;
+                        if (foundDoc != null) {
+                          _selectedBeltDocName = foundDoc.name;
+                        }
+                      } else if (type == 'other') {
+                        _selectedOtherDocId = selectedId;
+                        if (foundDoc != null) {
+                          _selectedOtherDocName = foundDoc.name;
+                        }
                       }
                     });
                   },
                   hint: 'Select',
                 ),
-                isRequired: isIdentity,
+                isRequired: type == 'identity',
               );
             },
           ),
-          const SizedBox(height: 16),
-          if (!isIdentity) ...[
-            _buildFieldLabelWrapper(
-              'DOCUMENT NAME',
-              _buildModernTextField(
-                _otherDocNameController,
-                'e.g. Migration Certificate',
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          if (type != 'medical' && type != 'other') const SizedBox(height: 16),
           _buildFieldLabelWrapper(
             'DOCUMENT NUMBER',
             _buildModernTextField(
-              isIdentity
+              type == 'identity'
                   ? _identityDocNumberController
-                  : _otherDocNumberController,
+                  : (type == 'belt'
+                        ? _beltDocNumberController
+                        : (type == 'medical'
+                              ? _medicalDocNumberController
+                              : _otherDocNumberController)),
               'e.g. ABC1234567',
-              validator: isIdentity
+              validator: type == 'identity'
                   ? (v) => v == null || v.isEmpty ? 'Required' : null
                   : null,
             ),
-            isRequired: isIdentity,
+            isRequired: type == 'identity',
           ),
           const SizedBox(height: 20),
-          _buildModernUploadArea(isIdentity),
+          _buildModernUploadArea(type),
         ],
       ),
     );
   }
 
-  Widget _buildModernUploadArea(bool isIdentity) {
-    final bool hasFile = isIdentity
-        ? _identityDocBytes != null
-        : _otherDocBytes != null;
-    final String? fileName = isIdentity
-        ? _identityDocFileName
-        : _otherDocFileName;
+  Widget _buildModernUploadArea(String type) {
+    bool hasFile = false;
+    String? fileName;
+
+    if (type == 'identity') {
+      hasFile = _identityDocBytes != null;
+      fileName = _identityDocFileName;
+    } else if (type == 'belt') {
+      hasFile = _beltDocBytes != null;
+      fileName = _beltDocFileName;
+    } else if (type == 'medical') {
+      hasFile = _medicalDocBytes != null;
+      fileName = _medicalDocFileName;
+    } else if (type == 'other') {
+      hasFile = _otherDocBytes != null;
+      fileName = _otherDocFileName;
+    }
 
     return Stack(
       children: [
         InkWell(
-          onTap: () => _pickDocument(isIdentity),
+          onTap: () => _pickDocument(type),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -2065,9 +2255,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: hasFile
-                        ? AppColors.deepAccent
-                        : AppColors.deepAccent,
+                    color: AppColors.deepAccent,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -2082,9 +2270,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   child: Icon(
                     hasFile ? Icons.check : Icons.upload_file,
-                    color: hasFile
-                        ? AppColors.textPrimary
-                        : AppColors.textPrimary,
+                    color: AppColors.textPrimary,
                     size: 24,
                   ),
                 ),
@@ -2123,12 +2309,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: InkWell(
               onTap: () {
                 setState(() {
-                  if (isIdentity) {
+                  if (type == 'identity') {
                     _identityDocBytes = null;
                     _identityDocFileName = null;
                     _identityDocBase64 = null;
                     _identityDocExtension = null;
-                  } else {
+                  } else if (type == 'belt') {
+                    _beltDocBytes = null;
+                    _beltDocFileName = null;
+                    _beltDocBase64 = null;
+                    _beltDocExtension = null;
+                  } else if (type == 'medical') {
+                    _medicalDocBytes = null;
+                    _medicalDocFileName = null;
+                    _medicalDocBase64 = null;
+                    _medicalDocExtension = null;
+                  } else if (type == 'other') {
                     _otherDocBytes = null;
                     _otherDocFileName = null;
                     _otherDocBase64 = null;
@@ -2271,7 +2467,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Future<void> _pickDocument(bool isIdentity) async {
+  Future<void> _pickDocument(String type) async {
     final XFile? file = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 50,
@@ -2286,12 +2482,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           : 'image/jpeg';
 
       setState(() {
-        if (isIdentity) {
+        if (type == 'identity') {
           _identityDocBytes = bytes;
           _identityDocFileName = file.name;
           _identityDocBase64 = "data:$contentType;base64,$base64Data";
           _identityDocExtension = extension;
-        } else {
+        } else if (type == 'belt') {
+          _beltDocBytes = bytes;
+          _beltDocFileName = file.name;
+          _beltDocBase64 = "data:$contentType;base64,$base64Data";
+          _beltDocExtension = extension;
+        } else if (type == 'medical') {
+          _medicalDocBytes = bytes;
+          _medicalDocFileName = file.name;
+          _medicalDocBase64 = "data:$contentType;base64,$base64Data";
+          _medicalDocExtension = extension;
+        } else if (type == 'other') {
           _otherDocBytes = bytes;
           _otherDocFileName = file.name;
           _otherDocBase64 = "data:$contentType;base64,$base64Data";
