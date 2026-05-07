@@ -21,12 +21,15 @@ class TournamentProvider with ChangeNotifier {
   bool _isRecapLoading = false;
 
   bool _isApplying = false;
+  String? _lastFetchedFixtureTournamentId;
+  Map<String, dynamic>? _lastFixtureResponse;
   
   List<Tournament> get myTournaments => _myTournaments;
   List<Tournament> get upcomingTournaments => _upcomingTournaments;
   List<Tournament> get completedTournaments => _completedTournaments;
   bool get isLoading => _isLoading;
   bool get isApplying => _isApplying;
+  String? get lastFetchedFixtureTournamentId => _lastFetchedFixtureTournamentId;
   bool get isFixtureLoading => _isFixtureLoading;
   String? get errorMessage => _errorMessage;
   int get totalTournaments => _totalTournaments;
@@ -132,7 +135,11 @@ class TournamentProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchFixtureDetails(String tournamentId) async {
+  Future<Map<String, dynamic>?> fetchFixtureDetails(String tournamentId, {bool forceRefresh = false}) async {
+    if (!forceRefresh && _lastFetchedFixtureTournamentId == tournamentId && _lastFixtureResponse != null) {
+      return _lastFixtureResponse;
+    }
+
     _isFixtureLoading = true;
     _fixtureDetails = [];
     _participantSlipUrl = null;
@@ -161,6 +168,8 @@ class TournamentProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null) {
+          _lastFetchedFixtureTournamentId = tournamentId;
+          _lastFixtureResponse = data['data'];
           _participantSlipUrl = data['data']['participant_slip'];
           if (data['data']['fixtures'] != null) {
             final List fixturesJson = data['data']['fixtures'];
@@ -168,6 +177,7 @@ class TournamentProvider with ChangeNotifier {
                 .map((json) => Fixture.fromJson(json))
                 .toList();
           }
+          return data['data'];
         }
       } else {
         _errorMessage = 'Failed to load fixture details';
@@ -178,6 +188,7 @@ class TournamentProvider with ChangeNotifier {
       _isFixtureLoading = false;
       notifyListeners();
     }
+    return null;
   }
 
   int? _calculateTournamentAge(String dob, String cutoffDate) {

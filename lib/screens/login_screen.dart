@@ -30,10 +30,16 @@ class _LoginScreenState extends State<LoginScreen> {
     // Base width of 375 for scaling
     final double scaleFactor = (screenWidth / 375.0).clamp(0.8, 1.2);
 
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        backgroundColor: AppColors.darkBg,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          backgroundColor: AppColors.darkBg,
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -438,6 +444,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ],
+            ),
             ),
           ),
         ),

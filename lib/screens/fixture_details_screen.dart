@@ -30,10 +30,14 @@ class _FixtureDetailsScreenState extends State<FixtureDetailsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TournamentProvider>(
+      final provider = Provider.of<TournamentProvider>(
         context,
         listen: false,
-      ).fetchFixtureDetails(widget.tournament.tournamentId);
+      );
+      if (provider.lastFetchedFixtureTournamentId !=
+          widget.tournament.tournamentId) {
+        provider.fetchFixtureDetails(widget.tournament.tournamentId);
+      }
     });
   }
 

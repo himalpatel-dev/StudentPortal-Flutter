@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:student_portal/providers/student_provider.dart';
 import 'package:student_portal/providers/tournament_provider.dart';
 import 'package:student_portal/models/tournament.dart';
@@ -43,8 +44,25 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+    // Determine status bar style based on selected tab
+    // Tab 0 (Home), 1 (Tournament), 3 (Profile) have dark headers -> Light icons
+    // Tab 2 (ID Card) has a light background -> Dark icons
+    final SystemUiOverlayStyle statusBarStyle = (_selectedNavIndex == 0 || _selectedNavIndex == 1 || _selectedNavIndex == 3)
+        ? SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          )
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: statusBarStyle,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
       body: Consumer2<StudentProvider, TournamentProvider>(
         builder: (context, studentProvider, tournamentProvider, child) {
           if (studentProvider.isLoading && studentProvider.student == null) {
@@ -67,7 +85,8 @@ class _HomePageState extends State<HomePage> {
                   ProfileTab(student: student),
                 ],
               ),
-              if (tournamentProvider.isApplying)
+              if (tournamentProvider.isApplying ||
+                  tournamentProvider.isFixtureLoading)
                 Container(
                   color: Colors.black45,
                   child: const Center(
@@ -79,59 +98,87 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       bottomNavigationBar: _buildBottomNav(),
+      ),
     );
   }
 
   Widget _buildBottomNav() {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
-            offset: const Offset(0, -5),
+            offset: const Offset(0, -8),
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        currentIndex: _selectedNavIndex,
-        onTap: (index) => setState(() => _selectedNavIndex = index),
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.deepAccent,
-        unselectedItemColor: AppColors.textGrey,
-        selectedLabelStyle: AppFonts.main(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
+      child: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
+            _buildNavItem(1, Icons.emoji_events_outlined, Icons.emoji_events_rounded, 'Tournament'),
+            _buildNavItem(2, Icons.badge_outlined, Icons.badge_rounded, 'ID Card'),
+            _buildNavItem(3, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+          ],
         ),
-        unselectedLabelStyle: AppFonts.main(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
+    final bool isSelected = _selectedNavIndex == index;
+    final Color activeColor = AppColors.deepAccent;
+    final Color inactiveColor = AppColors.textGrey.withOpacity(0.5);
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedNavIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        width: MediaQuery.of(context).size.width / 4.5,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? activeColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: activeColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
+                    : [],
+              ),
+              child: Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? Colors.white : inactiveColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: AppFonts.main(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                color: isSelected ? activeColor : inactiveColor,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
         ),
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.badge_outlined),
-            activeIcon: Icon(Icons.badge),
-            label: 'ID Card',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
@@ -140,12 +187,21 @@ class _HomePageState extends State<HomePage> {
     final student = studentProvider.student!;
     final stats = studentProvider.stats ?? StudentStats.empty();
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(student, stats),
-          Transform.translate(
+    return RefreshIndicator(
+      onRefresh: () async {
+        await studentProvider.fetchStudentDetails();
+        await studentProvider.fetchStudentStats();
+        await Provider.of<TournamentProvider>(context, listen: false).fetchTournaments();
+      },
+      color: AppColors.deepAccent,
+      backgroundColor: Colors.white,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(student, stats),
+            Transform.translate(
             offset: const Offset(0, 30),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -161,6 +217,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 40),
         ],
       ),
+    ),
     );
   }
 
@@ -761,16 +818,53 @@ class _HomePageState extends State<HomePage> {
                     isMyTournament ? 'FIXTURE' : 'APPLY',
                     Icons.layers_rounded,
                     onTap: isMyTournament
-                        ? () {
-                            Navigator.push(
+                        ? () async {
+                            final provider = Provider.of<TournamentProvider>(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => FixtureDetailsScreen(
-                                  tournament: tournament,
-                                  student: student,
-                                ),
-                              ),
+                              listen: false,
                             );
+                            final result = await provider.fetchFixtureDetails(
+                              tournament.tournamentId,
+                            );
+
+                            if (context.mounted) {
+                              if (result != null &&
+                                  result['approval_status']
+                                          ?.toString()
+                                          .toUpperCase() ==
+                                      'PENDING') {
+                                scaffoldMessengerKey.currentState
+                                    ?.hideCurrentSnackBar();
+                                scaffoldMessengerKey.currentState?.showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Your Approval is still pending for this Tournament.',
+                                      style: AppFonts.main(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    backgroundColor: AppColors.error,
+                                    behavior: SnackBarBehavior.floating,
+                                    margin: const EdgeInsets.all(20),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FixtureDetailsScreen(
+                                    tournament: tournament,
+                                    student: student,
+                                  ),
+                                ),
+                              );
+                            }
                           }
                         : () async {
                             if (student.applicationStatus.toUpperCase() !=
@@ -848,7 +942,9 @@ class _HomePageState extends State<HomePage> {
     Map<String, dynamic>? matchedCategory,
     List<dynamic> allCategories,
   ) {
-    int? selectedCategoryId = int.tryParse(matchedCategory?['category_division_id']?.toString() ?? '');
+    int? selectedCategoryId = int.tryParse(
+      matchedCategory?['category_division_id']?.toString() ?? '',
+    );
 
     showModalBottomSheet(
       context: context,
@@ -1048,15 +1144,16 @@ class _HomePageState extends State<HomePage> {
                               items: allCategories.map<DropdownMenuItem<int>>((
                                 cat,
                               ) {
-                                  final int catId = int.tryParse(
-                                        cat['category_division_id']?.toString() ??
-                                        '',
-                                      ) ??
-                                      0;
-                                  final bool isSelected =
-                                      catId == selectedCategoryId;
-                                  return DropdownMenuItem<int>(
-                                    value: catId,
+                                final int catId =
+                                    int.tryParse(
+                                      cat['category_division_id']?.toString() ??
+                                          '',
+                                    ) ??
+                                    0;
+                                final bool isSelected =
+                                    catId == selectedCategoryId;
+                                return DropdownMenuItem<int>(
+                                  value: catId,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,

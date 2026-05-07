@@ -31,11 +31,18 @@ class _CareerArchiveScreenState extends State<CareerArchiveScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          return Column(
-            children: [
-              _buildHeader(context, provider),
-              Expanded(child: _buildTournamentList(context, provider)),
-            ],
+          return RefreshIndicator(
+            onRefresh: () async {
+              await provider.fetchTournaments();
+            },
+            color: AppColors.deepAccent,
+            backgroundColor: Colors.white,
+            child: Column(
+              children: [
+                _buildHeader(context, provider),
+                Expanded(child: _buildTournamentList(context, provider)),
+              ],
+            ),
           );
         },
       ),
@@ -304,6 +311,7 @@ class _CareerArchiveScreenState extends State<CareerArchiveScreen> {
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
       itemCount: tournaments.length,
       itemBuilder: (context, index) {

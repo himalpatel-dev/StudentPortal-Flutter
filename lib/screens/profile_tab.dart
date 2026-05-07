@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:student_portal/models/student.dart';
+import 'package:student_portal/providers/student_provider.dart';
 import 'package:student_portal/providers/auth_provider.dart';
 import 'package:student_portal/screens/login_screen.dart';
 import 'package:student_portal/utils/app_colors.dart';
@@ -20,9 +21,17 @@ class ProfileTab extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Provider.of<StudentProvider>(context, listen: false)
+              .fetchStudentDetails();
+        },
+        color: AppColors.deepAccent,
+        backgroundColor: Colors.white,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
             // Header Section
             _buildPremiumHeader(context, scaleFactor),
 
@@ -168,6 +177,7 @@ class ProfileTab extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

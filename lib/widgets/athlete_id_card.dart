@@ -275,7 +275,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                     'TAP TO FLIP',
                     style: AppFonts.main(
                       fontSize: 10,
-                      color: AppColors.textPrimary.withOpacity(0.4),
+                      color: AppColors.textPrimary.withOpacity(0.8),
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.0,
                     ),
@@ -426,7 +426,11 @@ class _AthleteIdCardState extends State<AthleteIdCard>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: const BoxDecoration(
-              color: AppColors.surfaceDark,
+              gradient: LinearGradient(
+                colors: [AppColors.darkBg, AppColors.deepAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
             ),
             child: Center(
