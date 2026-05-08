@@ -253,6 +253,80 @@ class StudentProvider extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>?> updateStudent(
+    int studentId,
+    Map<String, dynamic> studentData,
+  ) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('authToken');
+
+      final response = await http.patch(
+        Uri.parse('${ApiConstants.authBaseUrl}/student/$studentId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(studentData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else {
+        final data = jsonDecode(response.body);
+        _errorMessage = data['message'] ?? 'Failed to update student';
+        return null;
+      }
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateStudentKudo(
+    int studentId,
+    Map<String, dynamic> studentData,
+  ) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('authToken');
+      final response = await http.put(
+        Uri.parse('${ApiConstants.kudoUrl}/api/students/update/$studentId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(studentData),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return data;
+      } else {
+        _errorMessage = data['message'] ?? 'Failed to update student in Kudo';
+        return null;
+      }
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> updateStudentProfileImage(int studentId, String imageUrl) async {
     try {
       final response = await http.patch(

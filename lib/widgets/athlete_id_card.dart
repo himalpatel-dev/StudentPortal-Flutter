@@ -4,6 +4,7 @@ import 'package:student_portal/models/student.dart';
 import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/utils/app_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:student_portal/utils/api_constants.dart';
 
 class AthleteIdCard extends StatefulWidget {
   final Student student;
@@ -385,7 +386,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                     ),
                     child: QrImageView(
                       data:
-                          'https://athlete-portal.com/verify/${widget.student.id}',
+                          '${ApiConstants.qrLink}/player-details/${widget.student.id}',
                       version: QrVersions.auto,
                       size: 220.0,
                       gapless: false,

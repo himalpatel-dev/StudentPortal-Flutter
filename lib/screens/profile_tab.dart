@@ -5,6 +5,7 @@ import 'package:student_portal/models/student.dart';
 import 'package:student_portal/providers/student_provider.dart';
 import 'package:student_portal/providers/auth_provider.dart';
 import 'package:student_portal/screens/login_screen.dart';
+import 'package:student_portal/screens/registration_screen.dart';
 import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/utils/app_fonts.dart';
 
@@ -23,8 +24,10 @@ class ProfileTab extends StatelessWidget {
       backgroundColor: const Color(0xFFF8FAFC),
       body: RefreshIndicator(
         onRefresh: () async {
-          await Provider.of<StudentProvider>(context, listen: false)
-              .fetchStudentDetails();
+          await Provider.of<StudentProvider>(
+            context,
+            listen: false,
+          ).fetchStudentDetails();
         },
         color: AppColors.deepAccent,
         backgroundColor: Colors.white,
@@ -32,152 +35,152 @@ class ProfileTab extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-            // Header Section
-            _buildPremiumHeader(context, scaleFactor),
+              // Header Section
+              _buildPremiumHeader(context, scaleFactor),
 
-            // Main Content
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24 * scaleFactor),
-              child: Column(
-                children: [
-                  SizedBox(height: 48 * scaleFactor),
+              // Main Content
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24 * scaleFactor),
+                child: Column(
+                  children: [
+                    SizedBox(height: 48 * scaleFactor),
 
-                  // 01 / IDENTITY
-                  _buildContentSection('PERSONAL DETAILS', [
-                    _buildDetailRow(
-                      Icons.person_outline_rounded,
-                      'FULL NAME',
-                      student.fullName,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.wc_rounded,
-                      'GENDER',
-                      student.gender,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.cake_outlined,
-                      'DATE OF BIRTH',
-                      _formatDate(student.dob),
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.calendar_today_rounded,
-                      'AGE',
-                      student.age > 0 ? '${student.age} Years' : '',
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.fingerprint_rounded,
-                      'AADHAR NUMBER',
-                      student.aadharNumber,
-                      scaleFactor,
-                    ),
-                  ], scaleFactor),
+                    // 01 / IDENTITY
+                    _buildContentSection('PERSONAL DETAILS', [
+                      _buildDetailRow(
+                        Icons.person_outline_rounded,
+                        'FULL NAME',
+                        student.fullName,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.wc_rounded,
+                        'GENDER',
+                        student.gender,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.cake_outlined,
+                        'DATE OF BIRTH',
+                        _formatDate(student.dob),
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.calendar_today_rounded,
+                        'AGE',
+                        student.age > 0 ? '${student.age} Years' : '',
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.fingerprint_rounded,
+                        'AADHAR NUMBER',
+                        student.aadharNumber,
+                        scaleFactor,
+                      ),
+                    ], scaleFactor),
 
-                  // 02 / REACH
-                  _buildContentSection('CONTACT INFORMATION', [
-                    _buildDetailRow(
-                      Icons.email_outlined,
-                      'EMAIL ADDRESS',
-                      student.email.toLowerCase(),
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.phone_iphone_rounded,
-                      'MOBILE NUMBER',
-                      student.contactNumber,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.emergency_outlined,
-                      'EMERGENCY CONTACT',
-                      student.emergencyContact,
-                      scaleFactor,
-                    ),
-                  ], scaleFactor),
+                    // 02 / REACH
+                    _buildContentSection('CONTACT INFORMATION', [
+                      _buildDetailRow(
+                        Icons.email_outlined,
+                        'EMAIL ADDRESS',
+                        student.email.toLowerCase(),
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.phone_iphone_rounded,
+                        'MOBILE NUMBER',
+                        student.contactNumber,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.emergency_outlined,
+                        'EMERGENCY CONTACT',
+                        student.emergencyContact,
+                        scaleFactor,
+                      ),
+                    ], scaleFactor),
 
-                  // 03 / FAMILY
-                  _buildContentSection('PARENT & GUARDIAN', [
-                    _buildDetailRow(
-                      Icons.man_rounded,
-                      "FATHER'S NAME",
-                      student.fatherName,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.woman_rounded,
-                      "MOTHER'S NAME",
-                      student.motherName,
-                      scaleFactor,
-                    ),
-                  ], scaleFactor),
+                    // 03 / FAMILY
+                    _buildContentSection('PARENT & GUARDIAN', [
+                      _buildDetailRow(
+                        Icons.man_rounded,
+                        "FATHER'S NAME",
+                        student.fatherName,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.woman_rounded,
+                        "MOTHER'S NAME",
+                        student.motherName,
+                        scaleFactor,
+                      ),
+                    ], scaleFactor),
 
-                  // 04 / LOCATION
-                  _buildContentSection('ADDRESS DETAILS', [
-                    _buildDetailRow(
-                      Icons.home_rounded,
-                      'ADDRESS',
-                      student.address,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.location_city_rounded,
-                      'CITY',
-                      student.city,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.map_rounded,
-                      'DISTRICT',
-                      student.district,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.explore_rounded,
-                      'STATE',
-                      student.state,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.public_rounded,
-                      'COUNTRY',
-                      student.country,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.pin_drop_rounded,
-                      'PINCODE',
-                      student.pincode,
-                      scaleFactor,
-                    ),
-                  ], scaleFactor),
+                    // 04 / LOCATION
+                    _buildContentSection('ADDRESS DETAILS', [
+                      _buildDetailRow(
+                        Icons.home_rounded,
+                        'ADDRESS',
+                        student.address,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.location_city_rounded,
+                        'CITY',
+                        student.city,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.map_rounded,
+                        'DISTRICT',
+                        student.district,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.explore_rounded,
+                        'STATE',
+                        student.state,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.public_rounded,
+                        'COUNTRY',
+                        student.country,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.pin_drop_rounded,
+                        'PINCODE',
+                        student.pincode,
+                        scaleFactor,
+                      ),
+                    ], scaleFactor),
 
-                  // 05 / AFFILIATION
-                  _buildContentSection('OTHER DETAILS', [
-                    _buildDetailRow(
-                      Icons.groups_rounded,
-                      'CLUB AFFILIATION',
-                      student.clubAffiliation,
-                      scaleFactor,
-                    ),
-                    _buildDetailRow(
-                      Icons.verified_user_rounded,
-                      'MEMBER SINCE',
-                      _formatDate(student.sopApprovalDate),
-                      scaleFactor,
-                    ),
-                  ], scaleFactor),
+                    // 05 / AFFILIATION
+                    _buildContentSection('OTHER DETAILS', [
+                      _buildDetailRow(
+                        Icons.groups_rounded,
+                        'CLUB AFFILIATION',
+                        student.clubAffiliation,
+                        scaleFactor,
+                      ),
+                      _buildDetailRow(
+                        Icons.verified_user_rounded,
+                        'MEMBER SINCE',
+                        _formatDate(student.sopApprovalDate),
+                        scaleFactor,
+                      ),
+                    ], scaleFactor),
 
-                  SizedBox(height: 48 * scaleFactor),
-                ],
+                    SizedBox(height: 48 * scaleFactor),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -252,32 +255,60 @@ class ProfileTab extends StatelessWidget {
                           ),
                         ],
                       ),
-                      InkWell(
-                        onTap: () {
-                          Provider.of<AuthProvider>(
-                            context,
-                            listen: false,
-                          ).logout();
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      RegistrationScreen(student: student),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.edit_note_rounded,
+                                color: AppColors.textPrimary.withOpacity(0.6),
+                                size: 20,
+                              ),
                             ),
-                            (route) => false,
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.textPrimary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(
-                            Icons.logout_rounded,
-                            color: AppColors.textPrimary.withOpacity(0.6),
-                            size: 20,
+                          const SizedBox(width: 12),
+                          InkWell(
+                            onTap: () {
+                              Provider.of<AuthProvider>(
+                                context,
+                                listen: false,
+                              ).logout();
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                                (route) => false,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.logout_rounded,
+                                color: AppColors.textPrimary.withOpacity(0.6),
+                                size: 20,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

@@ -1,3 +1,35 @@
+class StudentDocument {
+  final int docId;
+  final String fileName;
+  final String contentType;
+  final int documentTypeId;
+  final String documentTypeName;
+  final String documentNumber;
+  final String fileExt;
+
+  StudentDocument({
+    required this.docId,
+    required this.fileName,
+    required this.contentType,
+    required this.documentTypeId,
+    required this.documentTypeName,
+    required this.documentNumber,
+    required this.fileExt,
+  });
+
+  factory StudentDocument.fromJson(Map<String, dynamic> json) {
+    return StudentDocument(
+      docId: json['doc_id'] ?? 0,
+      fileName: json['doc_file_name'] ?? '',
+      contentType: json['doc_content_type'] ?? '',
+      documentTypeId: json['document_type_id'] ?? 0,
+      documentTypeName: json['document_type_name'] ?? '',
+      documentNumber: json['document_number'] ?? '',
+      fileExt: json['doc_file_ext'] ?? '',
+    );
+  }
+}
+
 class Student {
   final int id;
   final String firstName;
@@ -28,6 +60,7 @@ class Student {
   final String createdDate;
   final String uuid;
   final String applicationStatus;
+  final List<StudentDocument> documents;
 
   Student({
     required this.id,
@@ -59,9 +92,14 @@ class Student {
     required this.createdDate,
     required this.uuid,
     required this.applicationStatus,
+    this.documents = const [],
   });
 
   factory Student.fromJson(Map<String, dynamic> json) {
+    var docsList = json['StudentDocuments'] as List? ?? [];
+    List<StudentDocument> docs =
+        docsList.map((d) => StudentDocument.fromJson(d)).toList();
+
     return Student(
       id: json['id'] ?? 0,
       firstName: json['first_name'] ?? '',
@@ -83,7 +121,9 @@ class Student {
       aadharNumber: json['aadhar_number'] ?? '',
       email: json['email'] ?? '',
       contactNumber: json['contact_number'] ?? '',
-      studentProfileImage: json['student_profile_image'] ?? '',
+      studentProfileImage: (json['student_profile_image'] ?? '').isNotEmpty
+          ? '${json['student_profile_image']}?t=${DateTime.now().millisecondsSinceEpoch}'
+          : '',
       fatherName: json['father_name'] ?? '',
       motherName: json['mother_name'] ?? '',
       parentEmail: json['parent_email'] ?? '',
@@ -92,6 +132,7 @@ class Student {
       createdDate: json['createdDate'] ?? '',
       uuid: json['uuid'] ?? '',
       applicationStatus: json['application_status'] ?? '',
+      documents: docs,
     );
   }
 

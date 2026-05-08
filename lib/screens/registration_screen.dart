@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:student_portal/providers/student_provider.dart';
 import 'dart:convert';
@@ -8,9 +9,11 @@ import 'dart:typed_data';
 import 'dart:math';
 import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/models/master.dart';
+import 'package:student_portal/models/student.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+  final Student? student;
+  const RegistrationScreen({super.key, this.student});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -133,11 +136,121 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<StudentProvider>(context, listen: false);
-      provider.fetchCountries();
-      provider.fetchRequiredDocuments();
+      await provider.fetchCountries();
+      await provider.fetchRequiredDocuments();
+
+      if (widget.student != null) {
+        _populateFieldsForEdit();
+      }
     });
+  }
+
+  void _populateFieldsForEdit() async {
+    final s = widget.student!;
+    setState(() {
+      _fullNameController.text =
+          s.firstName + (s.lastName.isNotEmpty ? ' ${s.lastName}' : '');
+      _selectedGender = s.gender;
+      if (s.dob.isNotEmpty) {
+        try {
+          // If the date comes in ISO format (e.g. 2024-05-07T00:00:00Z)
+          DateTime dt = DateTime.parse(s.dob);
+          _dobController.text = DateFormat('yyyy-MM-dd').format(dt);
+        } catch (e) {
+          // Fallback if already formatted
+          _dobController.text = s.dob;
+        }
+      }
+      _ageController.text = s.age.toString();
+      _aadharController.text = s.aadharNumber;
+      _emailController.text = s.email;
+      _contactController.text = s.contactNumber;
+      _addressController.text = s.address;
+      _pincodeController.text = s.pincode;
+      _fatherNameController.text = s.fatherName;
+      _motherNameController.text = s.motherName;
+      _emergencyContactController.text = s.emergencyContact;
+      _heightController.text = s.height;
+      _weightController.text = s.weight;
+      _clubAffiliationController.text = s.clubAffiliation;
+      _physicalIndexController.text = s.physicalIndex;
+
+      // Populate Documents
+      for (var doc in s.documents) {
+        final docName = doc.documentTypeName.toLowerCase();
+        if (docName.contains('aadhar') ||
+            docName.contains('id') ||
+            docName.contains('identity')) {
+          _selectedIdentityDocId = doc.documentTypeId;
+          _selectedIdentityDocName = doc.documentTypeName;
+          _identityDocNumberController.text = doc.documentNumber;
+        } else if (docName.contains('belt')) {
+          _selectedBeltDocId = doc.documentTypeId;
+          _selectedBeltDocName = doc.documentTypeName;
+          _beltDocNumberController.text = doc.documentNumber;
+        } else if (docName.contains('medical')) {
+          _medicalDocId = doc.documentTypeId;
+          _medicalDocName = doc.documentTypeName;
+          _medicalDocNumberController.text = doc.documentNumber;
+        } else {
+          _selectedOtherDocId = doc.documentTypeId;
+          _selectedOtherDocName = doc.documentTypeName;
+          _otherDocNumberController.text = doc.documentNumber;
+        }
+      }
+    });
+
+    final provider = Provider.of<StudentProvider>(context, listen: false);
+
+    // Populate Location IDs
+    if (provider.countries.isNotEmpty) {
+      final country = provider.countries.firstWhere(
+        (c) => c.name.toLowerCase() == s.country.toLowerCase(),
+        orElse: () => provider.countries.first,
+      );
+      setState(() {
+        _selectedCountryId = country.id;
+        _selectedCountryName = country.name;
+      });
+
+      await provider.fetchStates(country.id);
+      if (provider.states.isNotEmpty) {
+        final state = provider.states.firstWhere(
+          (st) => st.name.toLowerCase() == s.state.toLowerCase(),
+          orElse: () => provider.states.first,
+        );
+        setState(() {
+          _selectedStateId = state.id;
+          _selectedStateName = state.name;
+        });
+
+        await provider.fetchDistricts(state.id);
+        if (provider.districts.isNotEmpty) {
+          final district = provider.districts.firstWhere(
+            (d) => d.name.toLowerCase() == s.district.toLowerCase(),
+            orElse: () => provider.districts.first,
+          );
+          setState(() {
+            _selectedDistrictId = district.id;
+            _selectedDistrictName = district.name;
+          });
+
+          await provider.fetchCities(district.id);
+          if (provider.cities.isNotEmpty) {
+            final city = provider.cities.firstWhere(
+              (c) => c.name.toLowerCase() == s.city.toLowerCase(),
+              orElse: () => provider.cities.first,
+            );
+            setState(() {
+              _selectedCityId = city.id;
+              _selectedCityName = city.name;
+            });
+          }
+        }
+      }
+    }
   }
 
   @override
@@ -393,71 +506,82 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       "email": _emailController.text,
       "contact_number": _contactController.text,
       "is_fee_paid": false,
-      "student_profile_image": _imageBase64,
-      "profile_image_cont_type": _imageContentType,
-      "StudentDocuments": [
-        if (_identityDocBase64 != null)
-          {
-            "doc_id": 0,
-            "is_active": true,
-            "uuid": null,
-            "doc_file_name": _identityDocBase64,
-            "doc_content_type": _identityDocExtension == 'pdf'
-                ? "application/pdf"
-                : "image/jpeg",
-            "doc_type": null,
-            "document_type_id": _selectedIdentityDocId,
-            "document_type_name": _selectedIdentityDocName,
-            "document_number": _identityDocNumberController.text,
-            "doc_file_ext": _identityDocExtension,
-          },
-        if (_beltDocBase64 != null)
-          {
-            "doc_id": 0,
-            "is_active": true,
-            "uuid": null,
-            "doc_file_name": _beltDocBase64,
-            "doc_content_type": _beltDocExtension == 'pdf'
-                ? "application/pdf"
-                : "image/jpeg",
-            "doc_type": null,
-            "document_type_id": _selectedBeltDocId,
-            "document_type_name": _selectedBeltDocName,
-            "document_number": _beltDocNumberController.text,
-            "doc_file_ext": _beltDocExtension,
-          },
-        if (_medicalDocBase64 != null)
-          {
-            "doc_id": 0,
-            "is_active": true,
-            "uuid": null,
-            "doc_file_name": _medicalDocBase64,
-            "doc_content_type": _medicalDocExtension == 'pdf'
-                ? "application/pdf"
-                : "image/jpeg",
-            "doc_type": null,
-            "document_type_id": _medicalDocId,
-            "document_type_name": _medicalDocName,
-            "document_number": _medicalDocNumberController.text,
-            "doc_file_ext": _medicalDocExtension,
-          },
-        if (_otherDocBase64 != null)
-          {
-            "doc_id": 0,
-            "is_active": true,
-            "uuid": null,
-            "doc_file_name": _otherDocBase64,
-            "doc_content_type": _otherDocExtension == 'pdf'
-                ? "application/pdf"
-                : "image/jpeg",
-            "doc_type": null,
-            "document_type_id": _selectedOtherDocId,
-            "document_type_name": _selectedOtherDocName,
-            "document_number": _otherDocNumberController.text,
-            "doc_file_ext": _otherDocExtension,
-          },
-      ],
-      "application_status": "PENDING",
+      if (_imageBase64 != null) ...{
+        "student_profile_image": _imageBase64,
+        "profile_image_cont_type": _imageContentType,
+      },
+    };
+
+    // Only include StudentDocuments if there are new ones to upload
+    final List<Map<String, dynamic>> newDocuments = [
+      if (_identityDocBase64 != null)
+        {
+          "doc_id": 0,
+          "is_active": true,
+          "uuid": null,
+          "doc_file_name": _identityDocBase64,
+          "doc_content_type": _identityDocExtension == 'pdf'
+              ? "application/pdf"
+              : "image/jpeg",
+          "doc_type": null,
+          "document_type_id": _selectedIdentityDocId,
+          "document_type_name": _selectedIdentityDocName,
+          "document_number": _identityDocNumberController.text,
+          "doc_file_ext": _identityDocExtension,
+        },
+      if (_beltDocBase64 != null)
+        {
+          "doc_id": 0,
+          "is_active": true,
+          "uuid": null,
+          "doc_file_name": _beltDocBase64,
+          "doc_content_type": _beltDocExtension == 'pdf'
+              ? "application/pdf"
+              : "image/jpeg",
+          "doc_type": null,
+          "document_type_id": _selectedBeltDocId,
+          "document_type_name": _selectedBeltDocName,
+          "document_number": _beltDocNumberController.text,
+          "doc_file_ext": _beltDocExtension,
+        },
+      if (_medicalDocBase64 != null)
+        {
+          "doc_id": 0,
+          "is_active": true,
+          "uuid": null,
+          "doc_file_name": _medicalDocBase64,
+          "doc_content_type": _medicalDocExtension == 'pdf'
+              ? "application/pdf"
+              : "image/jpeg",
+          "doc_type": null,
+          "document_type_id": _medicalDocId,
+          "document_type_name": _medicalDocName,
+          "document_number": _medicalDocNumberController.text,
+          "doc_file_ext": _medicalDocExtension,
+        },
+      if (_otherDocBase64 != null)
+        {
+          "doc_id": 0,
+          "is_active": true,
+          "uuid": null,
+          "doc_file_name": _otherDocBase64,
+          "doc_content_type": _otherDocExtension == 'pdf'
+              ? "application/pdf"
+              : "image/jpeg",
+          "doc_type": null,
+          "document_type_id": _selectedOtherDocId,
+          "document_type_name": _selectedOtherDocName,
+          "document_number": _otherDocNumberController.text,
+          "doc_file_ext": _otherDocExtension,
+        },
+    ];
+
+    if (newDocuments.isNotEmpty) {
+      studentData["StudentDocuments"] = newDocuments;
+    }
+
+    studentData.addAll({
+      "application_status": widget.student?.applicationStatus ?? "PENDING",
       "SopApprovalStep": 1,
       "IsApproval": false,
       "country_name": _selectedCountryName,
@@ -465,37 +589,79 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       "district_name": _selectedDistrictName,
       "city_name": _selectedCityName,
       "platform_id": 2,
-    };
+    });
 
     final studentProvider = Provider.of<StudentProvider>(
       context,
       listen: false,
     );
-    final response = await studentProvider.createStudent(studentData);
 
-    if (response != null && response['Table'] != null) {
-      // Send the enriched student data (with S3 URLs, UUID, etc.) to Kudo
-      await studentProvider.createStudentKudo(response['Table']);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration completed successfully!'),
-            backgroundColor: AppColors.success,
-          ),
+    if (widget.student != null) {
+      // Edit Mode
+      final response = await studentProvider.updateStudent(
+        widget.student!.id,
+        studentData,
+      );
+      if (response != null && response['Table'] != null) {
+        // Synchronize with Kudo using enriched data from portal response
+        await studentProvider.updateStudentKudo(
+          widget.student!.id,
+          response['Table'],
         );
-        // Navigator.of(context).pop();
+
+        // Load Student Details after synchronization
+        await studentProvider.fetchStudentDetails();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile updated successfully!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(studentProvider.errorMessage ?? 'Update failed'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              studentProvider.errorMessage ?? 'Registration failed',
+      // Registration Mode
+      final response = await studentProvider.createStudent(studentData);
+
+      if (response != null && response['Table'] != null) {
+        // Send the enriched student data (with S3 URLs, UUID, etc.) to Kudo
+        await studentProvider.createStudentKudo(response['Table']);
+
+        // Load Student Details after synchronization
+        await studentProvider.fetchStudentDetails();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration completed successfully!'),
+              backgroundColor: AppColors.success,
             ),
-            backgroundColor: AppColors.error,
-          ),
-        );
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                studentProvider.errorMessage ?? 'Registration failed',
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }
@@ -512,507 +678,510 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           backgroundColor: AppColors.fieldBg,
-        body: SafeArea(
-          bottom: true,
-          top: false,
-          child: Column(
-            children: [
-              _buildHeader(),
-              _buildCustomStepper(),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (index) {
-                    setState(() => _currentStep = index);
-                  },
-                  children: [
-                    _buildStep(
-                      formKey: _formKeys[0],
-                      fields: [
-                        _buildHeadshotUpload(),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader(
-                          Icons.person_outline,
-                          'BASIC DETAILS',
-                        ),
-                        const SizedBox(height: 24),
-                        _buildFieldLabelWrapper(
-                          'FULL NAME',
-                          _buildModernTextField(
-                            _fullNameController,
-                            'Full Name',
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Required' : null,
+          body: SafeArea(
+            bottom: true,
+            top: false,
+            child: Column(
+              children: [
+                _buildHeader(),
+                _buildCustomStepper(),
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) {
+                      setState(() => _currentStep = index);
+                    },
+                    children: [
+                      _buildStep(
+                        formKey: _formKeys[0],
+                        fields: [
+                          _buildHeadshotUpload(),
+                          const SizedBox(height: 32),
+                          _buildSectionHeader(
+                            Icons.person_outline,
+                            'BASIC DETAILS',
                           ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'GENDER',
-                          _buildModernRadioGroup(),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: _buildFieldLabelWrapper(
-                                'DATE OF BIRTH',
-                                _buildModernDateField(
-                                  _dobController,
-                                  'dd-mm-yyyy',
-                                ),
-                                isRequired: true,
-                              ),
+                          const SizedBox(height: 24),
+                          _buildFieldLabelWrapper(
+                            'FULL NAME',
+                            _buildModernTextField(
+                              _fullNameController,
+                              'Full Name',
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? 'Required' : null,
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              flex: 1,
-                              child: _buildFieldLabelWrapper(
-                                'AGE',
-                                Stack(
-                                  alignment: Alignment.centerRight,
-                                  children: [
-                                    _buildModernTextField(
-                                      _ageController,
-                                      '14',
-                                      keyboardType: TextInputType.number,
-                                      readOnly: true,
-                                      validator: (v) =>
-                                          _ageController.text.isEmpty
-                                          ? 'Required'
-                                          : null,
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.only(right: 12),
-                                      child: Text(
-                                        'YRS',
-                                        style: TextStyle(
-                                          color: AppColors.textDisabled,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'GENDER',
+                            _buildModernRadioGroup(),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: _buildFieldLabelWrapper(
+                                  'DATE OF BIRTH',
+                                  _buildModernDateField(
+                                    _dobController,
+                                    'dd-mm-yyyy',
+                                  ),
+                                  isRequired: true,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                flex: 1,
+                                child: _buildFieldLabelWrapper(
+                                  'AGE',
+                                  Stack(
+                                    alignment: Alignment.centerRight,
+                                    children: [
+                                      _buildModernTextField(
+                                        _ageController,
+                                        '14',
+                                        keyboardType: TextInputType.number,
+                                        readOnly: true,
+                                        validator: (v) =>
+                                            _ageController.text.isEmpty
+                                            ? 'Required'
+                                            : null,
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(right: 12),
+                                        child: Text(
+                                          'YRS',
+                                          style: TextStyle(
+                                            color: AppColors.textDisabled,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  isRequired: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'AADHAR NUMBER',
+                            _buildModernTextField(
+                              _aadharController,
+                              '0000-0000-0000',
+                              icon: Icons.credit_card_outlined,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(12),
+                                _AadharFormatter(),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (v.replaceAll('-', '').length < 12) {
+                                  return 'Enter 12 digits';
+                                }
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                        ],
+                      ),
+                      _buildStep(
+                        formKey: _formKeys[1],
+                        fields: [
+                          _buildSectionHeader(
+                            Icons.contact_mail_outlined,
+                            'CONTACT',
+                          ),
+                          const SizedBox(height: 24),
+                          _buildFieldLabelWrapper(
+                            'EMAIL ADDRESS',
+                            _buildModernTextField(
+                              _emailController,
+                              'example@domain.com',
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(v)) {
+                                  return 'Enter valid email';
+                                }
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'MOBILE NUMBER',
+                            _buildModernTextField(
+                              _contactController,
+                              '9876543210',
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (v.length < 10) return 'Enter 10 digits';
+                                if (!RegExp(r'^[6-9]').hasMatch(v)) {
+                                  return 'Enter valid mobile no';
+                                }
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 32),
+                          _buildSectionHeader(
+                            Icons.location_on_outlined,
+                            'ADDRESS',
+                          ),
+                          const SizedBox(height: 24),
+                          Consumer<StudentProvider>(
+                            builder: (context, provider, child) {
+                              return _buildFieldLabelWrapper(
+                                'COUNTRY',
+                                _buildModernDropdown<int>(
+                                  value: _selectedCountryId,
+                                  options: provider.countries
+                                      .map((c) => c.id)
+                                      .toList(),
+                                  getTitle: (id) => provider.countries
+                                      .firstWhere((c) => c.id == id)
+                                      .name,
+                                  validator: (v) =>
+                                      v == null ? 'Required' : null,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _selectedCountryId = val;
+                                      _selectedCountryName = provider.countries
+                                          .firstWhere((c) => c.id == val)
+                                          .name;
+                                      _selectedStateId = null;
+                                      _selectedDistrictId = null;
+                                      _selectedCityId = null;
+                                    });
+                                    provider.fetchStates(val!);
+                                  },
+                                  hint: 'Select Country',
                                 ),
                                 isRequired: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'AADHAR NUMBER',
-                          _buildModernTextField(
-                            _aadharController,
-                            '0000-0000-0000',
-                            icon: Icons.credit_card_outlined,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(12),
-                              _AadharFormatter(),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (v.replaceAll('-', '').length < 12) {
-                                return 'Enter 12 digits';
-                              }
-                              return null;
+                              );
                             },
                           ),
-                          isRequired: true,
-                        ),
-                      ],
-                    ),
-                    _buildStep(
-                      formKey: _formKeys[1],
-                      fields: [
-                        _buildSectionHeader(
-                          Icons.contact_mail_outlined,
-                          'CONTACT',
-                        ),
-                        const SizedBox(height: 24),
-                        _buildFieldLabelWrapper(
-                          'EMAIL ADDRESS',
-                          _buildModernTextField(
-                            _emailController,
-                            'example@domain.com',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (!RegExp(
-                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                              ).hasMatch(v)) {
-                                return 'Enter valid email';
-                              }
-                              return null;
-                            },
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'MOBILE NUMBER',
-                          _buildModernTextField(
-                            _contactController,
-                            '9876543210',
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (v.length < 10) return 'Enter 10 digits';
-                              if (!RegExp(r'^[6-9]').hasMatch(v)) {
-                                return 'Enter valid mobile no';
-                              }
-                              return null;
-                            },
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 32),
-                        _buildSectionHeader(
-                          Icons.location_on_outlined,
-                          'ADDRESS',
-                        ),
-                        const SizedBox(height: 24),
-                        Consumer<StudentProvider>(
-                          builder: (context, provider, child) {
-                            return _buildFieldLabelWrapper(
-                              'COUNTRY',
-                              _buildModernDropdown<int>(
-                                value: _selectedCountryId,
-                                options: provider.countries
-                                    .map((c) => c.id)
-                                    .toList(),
-                                getTitle: (id) => provider.countries
-                                    .firstWhere((c) => c.id == id)
-                                    .name,
-                                validator: (v) => v == null ? 'Required' : null,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedCountryId = val;
-                                    _selectedCountryName = provider.countries
-                                        .firstWhere((c) => c.id == val)
-                                        .name;
-                                    _selectedStateId = null;
-                                    _selectedDistrictId = null;
-                                    _selectedCityId = null;
-                                  });
-                                  provider.fetchStates(val!);
-                                },
-                                hint: 'Select Country',
-                              ),
-                              isRequired: true,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        Consumer<StudentProvider>(
-                          builder: (context, provider, child) {
-                            return _buildFieldLabelWrapper(
-                              'STATE',
-                              _buildModernDropdown<int>(
-                                value: _selectedStateId,
-                                options: provider.states
-                                    .map((s) => s.id)
-                                    .toList(),
-                                getTitle: (id) => provider.states
-                                    .firstWhere((s) => s.id == id)
-                                    .name,
-                                validator: (v) => v == null ? 'Required' : null,
-                                onChanged: (val) {
-                                  setState(() {
-                                    _selectedStateId = val;
-                                    _selectedStateName = provider.states
-                                        .firstWhere((s) => s.id == val)
-                                        .name;
-                                    _selectedDistrictId = null;
-                                    _selectedCityId = null;
-                                  });
-                                  provider.fetchDistricts(val!);
-                                },
-                                hint: 'Select State',
-                              ),
-                              isRequired: true,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Consumer<StudentProvider>(
-                                builder: (context, provider, child) {
-                                  return _buildFieldLabelWrapper(
-                                    'DISTRICT',
-                                    _buildModernDropdown<int>(
-                                      value: _selectedDistrictId,
-                                      options: provider.districts
-                                          .map((d) => d.id)
-                                          .toList(),
-                                      getTitle: (id) => provider.districts
-                                          .firstWhere((d) => d.id == id)
-                                          .name,
-                                      validator: (v) =>
-                                          v == null ? 'Required' : null,
-                                      onChanged: (val) {
-                                        setState(() {
-                                          _selectedDistrictId = val;
-                                          _selectedDistrictName = provider
-                                              .districts
-                                              .firstWhere((d) => d.id == val)
-                                              .name;
-                                          _selectedCityId = null;
-                                        });
-                                        provider.fetchCities(val!);
-                                      },
-                                      hint: 'Select District',
-                                    ),
-                                    isRequired: true,
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Consumer<StudentProvider>(
-                                builder: (context, provider, child) {
-                                  return _buildFieldLabelWrapper(
-                                    'CITY',
-                                    _buildModernDropdown<int>(
-                                      value: _selectedCityId,
-                                      options: provider.cities
-                                          .map((c) => c.id)
-                                          .toList(),
-                                      getTitle: (id) => provider.cities
-                                          .firstWhere((c) => c.id == id)
-                                          .name,
-                                      validator: (v) =>
-                                          v == null ? 'Required' : null,
-                                      onChanged: (val) {
-                                        setState(() {
-                                          _selectedCityId = val;
-                                          _selectedCityName = provider.cities
-                                              .firstWhere((c) => c.id == val)
-                                              .name;
-                                        });
-                                      },
-                                      hint: 'Select City',
-                                    ),
-                                    isRequired: true,
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'PINCODE',
-                          _buildModernTextField(
-                            _pincodeController,
-                            '000000',
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(6),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (v.length < 6) return 'Enter 6 digits';
-                              return null;
-                            },
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'RESIDENTIAL ADDRESS',
-                          _buildModernTextField(
-                            _addressController,
-                            'Street name, Area, House no.',
-                            maxLines: 2,
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Required' : null,
-                          ),
-                          isRequired: true,
-                        ),
-                      ],
-                    ),
-                    _buildStep(
-                      formKey: _formKeys[2],
-                      fields: [
-                        _buildSectionHeader(Icons.people_outline, 'PARENTS'),
-                        const SizedBox(height: 24),
-                        _buildFieldLabelWrapper(
-                          "FATHER'S NAME",
-                          _buildModernTextField(
-                            _fatherNameController,
-                            'Full Name',
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Required' : null,
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          "MOTHER'S NAME",
-                          _buildModernTextField(
-                            _motherNameController,
-                            'Full Name',
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Required' : null,
-                          ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'EMERGENCY CONTACT',
-                          _buildModernTextField(
-                            _emergencyContactController,
-                            '9876543210',
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (v.length < 10) return 'Enter 10 digits';
-                              if (!RegExp(r'^[6-9]').hasMatch(v)) {
-                                return 'Enter valid mobile no';
-                              }
-                              return null;
-                            },
-                          ),
-                          isRequired: true,
-                        ),
-                      ],
-                    ),
-                    _buildStep(
-                      formKey: _formKeys[3],
-                      fields: [
-                        _buildSectionHeader(Icons.straighten, 'MEASUREMENTS'),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildFieldLabelWrapper(
-                                'HEIGHT (CM)',
-                                _buildModernTextField(
-                                  _heightController,
-                                  '170',
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(3),
-                                  ],
-                                  validator: (v) => v == null || v.isEmpty
-                                      ? 'Required'
-                                      : null,
+                          const SizedBox(height: 16),
+                          Consumer<StudentProvider>(
+                            builder: (context, provider, child) {
+                              return _buildFieldLabelWrapper(
+                                'STATE',
+                                _buildModernDropdown<int>(
+                                  value: _selectedStateId,
+                                  options: provider.states
+                                      .map((s) => s.id)
+                                      .toList(),
+                                  getTitle: (id) => provider.states
+                                      .firstWhere((s) => s.id == id)
+                                      .name,
+                                  validator: (v) =>
+                                      v == null ? 'Required' : null,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _selectedStateId = val;
+                                      _selectedStateName = provider.states
+                                          .firstWhere((s) => s.id == val)
+                                          .name;
+                                      _selectedDistrictId = null;
+                                      _selectedCityId = null;
+                                    });
+                                    provider.fetchDistricts(val!);
+                                  },
+                                  hint: 'Select State',
                                 ),
                                 isRequired: true,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _buildFieldLabelWrapper(
-                                'WEIGHT (KG)',
-                                _buildModernTextField(
-                                  _weightController,
-                                  '65',
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                    LengthLimitingTextInputFormatter(3),
-                                  ],
-                                  validator: (v) => v == null || v.isEmpty
-                                      ? 'Required'
-                                      : null,
-                                ),
-                                isRequired: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'PHYSICAL INDEX',
-                          _buildModernTextField(
-                            _physicalIndexController,
-                            '0.00',
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d+\.?\d{0,2}'),
-                              ),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.isEmpty) return 'Required';
-                              if (double.tryParse(v) == null) {
-                                return 'Enter valid decimal';
-                              }
-                              return null;
+                              );
                             },
                           ),
-                          isRequired: true,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildFieldLabelWrapper(
-                          'CLUB AFFILIATION',
-                          _buildModernTextField(
-                            _clubAffiliationController,
-                            'Club Name',
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Consumer<StudentProvider>(
+                                  builder: (context, provider, child) {
+                                    return _buildFieldLabelWrapper(
+                                      'DISTRICT',
+                                      _buildModernDropdown<int>(
+                                        value: _selectedDistrictId,
+                                        options: provider.districts
+                                            .map((d) => d.id)
+                                            .toList(),
+                                        getTitle: (id) => provider.districts
+                                            .firstWhere((d) => d.id == id)
+                                            .name,
+                                        validator: (v) =>
+                                            v == null ? 'Required' : null,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            _selectedDistrictId = val;
+                                            _selectedDistrictName = provider
+                                                .districts
+                                                .firstWhere((d) => d.id == val)
+                                                .name;
+                                            _selectedCityId = null;
+                                          });
+                                          provider.fetchCities(val!);
+                                        },
+                                        hint: 'Select District',
+                                      ),
+                                      isRequired: true,
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Consumer<StudentProvider>(
+                                  builder: (context, provider, child) {
+                                    return _buildFieldLabelWrapper(
+                                      'CITY',
+                                      _buildModernDropdown<int>(
+                                        value: _selectedCityId,
+                                        options: provider.cities
+                                            .map((c) => c.id)
+                                            .toList(),
+                                        getTitle: (id) => provider.cities
+                                            .firstWhere((c) => c.id == id)
+                                            .name,
+                                        validator: (v) =>
+                                            v == null ? 'Required' : null,
+                                        onChanged: (val) {
+                                          setState(() {
+                                            _selectedCityId = val;
+                                            _selectedCityName = provider.cities
+                                                .firstWhere((c) => c.id == val)
+                                                .name;
+                                          });
+                                        },
+                                        hint: 'Select City',
+                                      ),
+                                      isRequired: true,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    _buildStep(
-                      formKey: _formKeys[4],
-                      fields: [
-                        _buildSectionHeader(
-                          Icons.description_outlined,
-                          'DOCUMENTS',
-                          showDot: false,
-                        ),
-                        const SizedBox(height: 32),
-                        _buildModernDocumentCard(
-                          title: 'IDENTITY DOCUMENT',
-                          type: 'identity',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildModernDocumentCard(
-                          title: 'BELT CERTIFICATE',
-                          type: 'belt',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildModernDocumentCard(
-                          title: 'MEDICAL CERTIFICATE',
-                          type: 'medical',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildModernDocumentCard(
-                          title: 'OTHER DOCUMENTS',
-                          type: 'other',
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'PINCODE',
+                            _buildModernTextField(
+                              _pincodeController,
+                              '000000',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(6),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (v.length < 6) return 'Enter 6 digits';
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'RESIDENTIAL ADDRESS',
+                            _buildModernTextField(
+                              _addressController,
+                              'Street name, Area, House no.',
+                              maxLines: 2,
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            isRequired: true,
+                          ),
+                        ],
+                      ),
+                      _buildStep(
+                        formKey: _formKeys[2],
+                        fields: [
+                          _buildSectionHeader(Icons.people_outline, 'PARENTS'),
+                          const SizedBox(height: 24),
+                          _buildFieldLabelWrapper(
+                            "FATHER'S NAME",
+                            _buildModernTextField(
+                              _fatherNameController,
+                              'Full Name',
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            "MOTHER'S NAME",
+                            _buildModernTextField(
+                              _motherNameController,
+                              'Full Name',
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? 'Required' : null,
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'EMERGENCY CONTACT',
+                            _buildModernTextField(
+                              _emergencyContactController,
+                              '9876543210',
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (v.length < 10) return 'Enter 10 digits';
+                                if (!RegExp(r'^[6-9]').hasMatch(v)) {
+                                  return 'Enter valid mobile no';
+                                }
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                        ],
+                      ),
+                      _buildStep(
+                        formKey: _formKeys[3],
+                        fields: [
+                          _buildSectionHeader(Icons.straighten, 'MEASUREMENTS'),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildFieldLabelWrapper(
+                                  'HEIGHT (CM)',
+                                  _buildModernTextField(
+                                    _heightController,
+                                    '170',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(3),
+                                    ],
+                                    validator: (v) => v == null || v.isEmpty
+                                        ? 'Required'
+                                        : null,
+                                  ),
+                                  isRequired: true,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildFieldLabelWrapper(
+                                  'WEIGHT (KG)',
+                                  _buildModernTextField(
+                                    _weightController,
+                                    '65',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(3),
+                                    ],
+                                    validator: (v) => v == null || v.isEmpty
+                                        ? 'Required'
+                                        : null,
+                                  ),
+                                  isRequired: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'PHYSICAL INDEX',
+                            _buildModernTextField(
+                              _physicalIndexController,
+                              '0.00',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d+\.?\d{0,2}'),
+                                ),
+                              ],
+                              validator: (v) {
+                                if (v == null || v.isEmpty) return 'Required';
+                                if (double.tryParse(v) == null) {
+                                  return 'Enter valid decimal';
+                                }
+                                return null;
+                              },
+                            ),
+                            isRequired: true,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldLabelWrapper(
+                            'CLUB AFFILIATION',
+                            _buildModernTextField(
+                              _clubAffiliationController,
+                              'Club Name',
+                            ),
+                          ),
+                        ],
+                      ),
+                      _buildStep(
+                        formKey: _formKeys[4],
+                        fields: [
+                          _buildSectionHeader(
+                            Icons.description_outlined,
+                            'DOCUMENTS',
+                            showDot: false,
+                          ),
+                          const SizedBox(height: 32),
+                          _buildModernDocumentCard(
+                            title: 'IDENTITY DOCUMENT',
+                            type: 'identity',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildModernDocumentCard(
+                            title: 'BELT CERTIFICATE',
+                            type: 'belt',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildModernDocumentCard(
+                            title: 'MEDICAL CERTIFICATE',
+                            type: 'medical',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildModernDocumentCard(
+                            title: 'OTHER DOCUMENTS',
+                            type: 'other',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              _buildModernFooter(),
-            ],
+                _buildModernFooter(),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -1060,9 +1229,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Column(
                     children: [
                       const SizedBox(height: 4),
-                      const Text(
-                        'Athlete Enrollment',
-                        style: TextStyle(
+                      Text(
+                        widget.student != null
+                            ? 'Update Profile'
+                            : 'Athlete Enrollment',
+                        style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
@@ -1073,27 +1244,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   const Spacer(),
 
-                  InkWell(
-                    onTap: _fillDemoData,
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryAccent.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: AppColors.primaryAccent.withOpacity(0.3),
-                          width: 1,
+                  if (widget.student == null)
+                    InkWell(
+                      onTap: _fillDemoData,
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppColors.primaryAccent.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.auto_fix_high,
+                          color: Colors.white,
+                          size: 20,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.auto_fix_high,
-                        color: Colors.white,
-                        size: 20,
-                      ),
                     ),
-                  ),
                   //const Spacer(),
                 ],
               ),
@@ -1338,7 +1510,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget _buildHeadshotUpload() {
     return FormField<Uint8List?>(
       initialValue: _pickedImageBytes,
-      validator: (val) => val == null ? 'Profile image is required' : null,
+      validator: (val) {
+        if (widget.student != null &&
+            widget.student!.studentProfileImage.isNotEmpty) {
+          return null;
+        }
+        return val == null ? 'Profile image is required' : null;
+      },
       builder: (state) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1436,11 +1614,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                               _pickedImageBytes!,
                                               fit: BoxFit.cover,
                                             )
-                                          : Icon(
-                                              Icons.person,
-                                              color: AppColors.deepAccent,
-                                              size: 40,
-                                            ),
+                                          : (widget
+                                                        .student
+                                                        ?.studentProfileImage
+                                                        .isNotEmpty ==
+                                                    true
+                                                ? Image.network(
+                                                    widget
+                                                        .student!
+                                                        .studentProfileImage,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) => Icon(
+                                                          Icons.person,
+                                                          color: AppColors
+                                                              .deepAccent,
+                                                          size: 40,
+                                                        ),
+                                                  )
+                                                : Icon(
+                                                    Icons.person,
+                                                    color: AppColors.deepAccent,
+                                                    size: 40,
+                                                  )),
                                     ),
                                   ),
                                   Positioned(
@@ -1778,7 +1978,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 if (pickedDate != null) {
                   setState(() {
                     controller.text = pickedDate.toString().split(' ')[0];
-                    final age = DateTime.now().year - pickedDate.year;
+                    DateTime today = DateTime.now();
+                    int age = today.year - pickedDate.year;
+                    if (today.month < pickedDate.month ||
+                        (today.month == pickedDate.month &&
+                            today.day < pickedDate.day)) {
+                      age--;
+                    }
                     _ageController.text = age.toString();
                   });
                   state.didChange(controller.text);
@@ -2221,6 +2427,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
+  bool _hasExistingDoc(String type) {
+    if (widget.student == null) return false;
+    return widget.student!.documents.any((doc) {
+      final docName = doc.documentTypeName.toLowerCase();
+      if (type == 'identity')
+        return docName.contains('aadhar') ||
+            docName.contains('id') ||
+            docName.contains('identity');
+      if (type == 'belt') return docName.contains('belt');
+      if (type == 'medical') return docName.contains('medical');
+      return !docName.contains('aadhar') &&
+          !docName.contains('id') &&
+          !docName.contains('identity') &&
+          !docName.contains('belt') &&
+          !docName.contains('medical');
+    });
+  }
+
   Widget _buildModernUploadArea(String type) {
     bool hasFile = false;
     String? fileName;
@@ -2237,6 +2461,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     } else if (type == 'other') {
       hasFile = _otherDocBytes != null;
       fileName = _otherDocFileName;
+    }
+
+    final bool alreadyExists = !hasFile && _hasExistingDoc(type);
+    if (alreadyExists) {
+      hasFile = true;
+      fileName = "Document on server";
     }
 
     return Stack(
