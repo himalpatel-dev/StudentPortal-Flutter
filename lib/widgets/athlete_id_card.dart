@@ -5,6 +5,7 @@ import 'package:student_portal/utils/app_colors.dart';
 import 'package:student_portal/utils/app_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:student_portal/utils/api_constants.dart';
+import 'package:intl/intl.dart';
 
 class AthleteIdCard extends StatefulWidget {
   final Student student;
@@ -48,6 +49,45 @@ class _AthleteIdCardState extends State<AthleteIdCard>
     setState(() {
       _isFront = !_isFront;
     });
+  }
+
+  String _formatDate(String dateString) {
+    if (dateString.isEmpty ||
+        dateString.toLowerCase() == 'n/a' ||
+        dateString.toLowerCase() == 'null' ||
+        dateString.toLowerCase() == 'undefined') {
+      return 'N/A';
+    }
+    try {
+      DateTime? date;
+      // Handle dd-MM-yyyy or dd/MM/yyyy formats
+      if (dateString.contains('-') || dateString.contains('/')) {
+        final separator = dateString.contains('-') ? '-' : '/';
+        final parts = dateString.split(separator);
+        if (parts.length == 3) {
+          if (parts[0].length == 4) {
+            // yyyy-MM-dd
+            date = DateTime.parse(dateString);
+          } else if (parts[2].length == 4 || parts[2].length == 2) {
+            // dd-MM-yyyy or dd-MM-yy
+            int year = int.parse(parts[2]);
+            if (year < 100) {
+              year += year > 50 ? 1900 : 2000;
+            }
+            date = DateTime(
+              year,
+              int.parse(parts[1]),
+              int.parse(parts[0]),
+            );
+          }
+        }
+      }
+
+      date ??= DateTime.parse(dateString);
+      return DateFormat('dd MMM yy').format(date).toUpperCase();
+    } catch (e) {
+      return dateString.toUpperCase();
+    }
   }
 
   @override
@@ -232,7 +272,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                       widget.student.gender.toUpperCase(),
                     ),
                     const SizedBox(width: 10),
-                    _buildInfoBox('DOB', widget.student.dob.split('-').first),
+                    _buildInfoBox('DOB', _formatDate(widget.student.dob)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -243,7 +283,7 @@ class _AthleteIdCardState extends State<AthleteIdCard>
                     _buildInfoBox('HEIGHT', '${widget.student.height} CM'),
                     const SizedBox(width: 10),
                     _buildInfoBox(
-                      'Physical Index',
+                      'PHY INDEX',
                       widget.student.physicalIndex.toString(),
                     ),
                   ],
@@ -518,15 +558,19 @@ class _AthleteIdCardState extends State<AthleteIdCard>
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              value,
-              style: AppFonts.heading(
-                fontSize: 14,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w900,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: AppFonts.heading(
+                  fontSize: 14,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
