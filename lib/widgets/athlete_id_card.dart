@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:student_portal/models/student.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
+import 'package:stradia_ace/models/student.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:student_portal/utils/api_constants.dart';
+import 'package:stradia_ace/utils/api_constants.dart';
 import 'package:intl/intl.dart';
 
 class AthleteIdCard extends StatefulWidget {

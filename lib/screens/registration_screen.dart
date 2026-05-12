@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:student_portal/providers/student_provider.dart';
+import 'package:stradia_ace/providers/student_provider.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:math';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/models/master.dart';
-import 'package:student_portal/models/student.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/models/master.dart';
+import 'package:stradia_ace/models/student.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final Student? student;

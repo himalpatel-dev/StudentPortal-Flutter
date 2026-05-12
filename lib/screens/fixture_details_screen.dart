@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:student_portal/models/fixture.dart';
-import 'package:student_portal/models/student.dart';
-import 'package:student_portal/models/tournament.dart';
-import 'package:student_portal/providers/tournament_provider.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
+import 'package:stradia_ace/models/fixture.dart';
+import 'package:stradia_ace/models/student.dart';
+import 'package:stradia_ace/models/tournament.dart';
+import 'package:stradia_ace/providers/tournament_provider.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
 
 class FixtureDetailsScreen extends StatefulWidget {
   final Tournament tournament;

@@ -7,7 +7,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:student_portal/main.dart';
+import 'package:stradia_ace/main.dart';
 
 void main() {
   testWidgets('Login screen smoke test', (WidgetTester tester) async {

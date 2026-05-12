@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
-import 'package:student_portal/screens/event_recap_screen.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
+import 'package:stradia_ace/screens/event_recap_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:student_portal/providers/tournament_provider.dart';
-import 'package:student_portal/models/tournament.dart';
+import 'package:stradia_ace/providers/tournament_provider.dart';
+import 'package:stradia_ace/models/tournament.dart';
 import 'package:intl/intl.dart';
 
 class CareerArchiveScreen extends StatefulWidget {

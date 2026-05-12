@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
-import 'package:student_portal/screens/home_page.dart';
+import 'package:stradia_ace/screens/home_page.dart';
 import 'package:provider/provider.dart';
-import 'package:student_portal/providers/auth_provider.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
+import 'package:stradia_ace/providers/auth_provider.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 

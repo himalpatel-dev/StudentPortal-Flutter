@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:student_portal/models/student.dart';
-import 'package:student_portal/providers/student_provider.dart';
-import 'package:student_portal/providers/auth_provider.dart';
-import 'package:student_portal/screens/login_screen.dart';
-import 'package:student_portal/screens/registration_screen.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
+import 'package:stradia_ace/models/student.dart';
+import 'package:stradia_ace/providers/student_provider.dart';
+import 'package:stradia_ace/providers/auth_provider.dart';
+import 'package:stradia_ace/screens/login_screen.dart';
+import 'package:stradia_ace/screens/registration_screen.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
 
 class ProfileTab extends StatelessWidget {
   final Student student;

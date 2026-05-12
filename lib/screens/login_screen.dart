@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:student_portal/providers/auth_provider.dart';
-import 'package:student_portal/screens/otp_screen.dart';
-import 'package:student_portal/screens/registration_screen.dart';
-import 'package:student_portal/utils/app_colors.dart';
-import 'package:student_portal/utils/app_fonts.dart';
+import 'package:stradia_ace/providers/auth_provider.dart';
+import 'package:stradia_ace/screens/otp_screen.dart';
+import 'package:stradia_ace/screens/registration_screen.dart';
+import 'package:stradia_ace/utils/app_colors.dart';
+import 'package:stradia_ace/utils/app_fonts.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
