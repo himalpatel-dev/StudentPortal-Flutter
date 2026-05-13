@@ -1,16 +1,31 @@
 # Stradia Ace
 
-A new Flutter project.
+A premium athletic portal for students to manage their tournament registrations, track match results, and maintain their athlete profile.
+
+## Features
+
+- **Athlete ID Card**: Digital identification for student athletes.
+- **Tournament Management**: Register for upcoming tournaments and view ongoing participation.
+- **Career Archive**: Historical record of all matches, bouts, and medals (Gold, Silver, Bronze).
+- **Real-time Fixtures**: View match schedules, ring assignments, and reporting times.
+- **Profile Management**: Maintain personal, physical, and document records.
+
+## Tech Stack
+
+- **Framework**: Flutter (Dart)
+- **State Management**: Provider
+- **API Integration**: RESTful APIs via `http`
+- **Data Persistence**: `shared_preferences`
+- **Modern UI**: Custom gradients, animated transitions, and premium typography.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. **Clone the repository**
+2. **Install dependencies**: `flutter pub get`
+3. **Run the application**: `flutter run`
 
-A few resources to get you started if this is your first Flutter project:
+## Production Notes
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- API endpoints are configured in `lib/utils/api_constants.dart`.
+- The app uses `google_fonts` for premium typography.
+- Built for both Android and iOS platforms.

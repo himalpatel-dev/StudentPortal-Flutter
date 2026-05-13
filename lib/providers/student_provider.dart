@@ -42,7 +42,7 @@ class StudentProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error fetching countries: $e');
+      _errorMessage = 'Error fetching countries: $e';
     }
   }
 
@@ -62,7 +62,7 @@ class StudentProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error fetching states: $e');
+      _errorMessage = 'Error fetching states: $e';
     }
   }
 
@@ -81,7 +81,7 @@ class StudentProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error fetching districts: $e');
+      _errorMessage = 'Error fetching districts: $e';
     }
   }
 
@@ -99,7 +99,7 @@ class StudentProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error fetching cities: $e');
+      _errorMessage = 'Error fetching cities: $e';
     }
   }
 
@@ -119,7 +119,7 @@ class StudentProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error fetching required documents: $e');
+      _errorMessage = 'Error fetching documents: $e';
     }
   }
 
@@ -130,7 +130,14 @@ class StudentProvider extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final studentId = prefs.getString('studentId') ?? '1';
+      final studentId = prefs.getString('studentId');
+
+      if (studentId == null) {
+        _errorMessage = 'Session expired. Please login again.';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       final token = prefs.getString('authToken');
       final response = await http
@@ -226,7 +233,15 @@ class StudentProvider extends ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final studentId = prefs.getString('studentId') ?? '124';
+      final studentId = prefs.getString('studentId');
+
+      if (studentId == null) {
+        _errorMessage = 'Session expired. Please login again.';
+        _isLoading = false;
+        _stats = StudentStats.empty();
+        notifyListeners();
+        return;
+      }
 
       final token = prefs.getString('authToken');
       final response = await http.get(
@@ -241,11 +256,10 @@ class StudentProvider extends ChangeNotifier {
         final body = jsonDecode(response.body);
         _stats = StudentStats.fromJson(body['data']);
       } else {
-        debugPrint('Failed to load stats: ${response.statusCode}');
         _stats = StudentStats.empty();
       }
     } catch (e) {
-      debugPrint('Error fetching student stats: $e');
+      _errorMessage = 'Error fetching student stats: $e';
       _stats = StudentStats.empty();
     } finally {
       _isLoading = false;
@@ -354,7 +368,7 @@ class StudentProvider extends ChangeNotifier {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      debugPrint('Error updating local profile image: $e');
+      _errorMessage = 'Error updating local profile image: $e';
       return false;
     }
   }

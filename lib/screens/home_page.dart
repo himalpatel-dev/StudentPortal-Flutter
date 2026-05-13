@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously, duplicate_ignore
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +49,10 @@ class _HomePageState extends State<HomePage> {
     // Determine status bar style based on selected tab
     // Tab 0 (Home), 1 (Tournament), 3 (Profile) have dark headers -> Light icons
     // Tab 2 (ID Card) has a light background -> Dark icons
-    final SystemUiOverlayStyle statusBarStyle = (_selectedNavIndex == 0 || _selectedNavIndex == 1 || _selectedNavIndex == 3)
+    final SystemUiOverlayStyle statusBarStyle =
+        (_selectedNavIndex == 0 ||
+            _selectedNavIndex == 1 ||
+            _selectedNavIndex == 3)
         ? SystemUiOverlayStyle.light.copyWith(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: Brightness.light,
@@ -63,41 +68,41 @@ class _HomePageState extends State<HomePage> {
       value: statusBarStyle,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-      body: Consumer2<StudentProvider, TournamentProvider>(
-        builder: (context, studentProvider, tournamentProvider, child) {
-          if (studentProvider.isLoading && studentProvider.student == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        body: Consumer2<StudentProvider, TournamentProvider>(
+          builder: (context, studentProvider, tournamentProvider, child) {
+            if (studentProvider.isLoading && studentProvider.student == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          final student = studentProvider.student;
-          if (student == null) {
-            return const Center(child: Text('Failed to load profile'));
-          }
+            final student = studentProvider.student;
+            if (student == null) {
+              return const Center(child: Text('Failed to load profile'));
+            }
 
-          return Stack(
-            children: [
-              IndexedStack(
-                index: _selectedNavIndex,
-                children: [
-                  _buildHomeContent(studentProvider),
-                  const CareerArchiveScreen(),
-                  AthleteIdCard(student: student),
-                  ProfileTab(student: student),
-                ],
-              ),
-              if (tournamentProvider.isApplying ||
-                  tournamentProvider.isFixtureLoading)
-                Container(
-                  color: Colors.black45,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
+            return Stack(
+              children: [
+                IndexedStack(
+                  index: _selectedNavIndex,
+                  children: [
+                    _buildHomeContent(studentProvider),
+                    const CareerArchiveScreen(),
+                    AthleteIdCard(student: student),
+                    ProfileTab(student: student),
+                  ],
                 ),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: _buildBottomNav(),
+                if (tournamentProvider.isApplying ||
+                    tournamentProvider.isFixtureLoading)
+                  Container(
+                    color: Colors.black45,
+                    child: const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: _buildBottomNav(),
       ),
     );
   }
@@ -121,16 +126,36 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
-            _buildNavItem(1, Icons.emoji_events_outlined, Icons.emoji_events_rounded, 'Tournament'),
-            _buildNavItem(2, Icons.badge_outlined, Icons.badge_rounded, 'ID Card'),
-            _buildNavItem(3, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+            _buildNavItem(
+              1,
+              Icons.emoji_events_outlined,
+              Icons.emoji_events_rounded,
+              'Tournament',
+            ),
+            _buildNavItem(
+              2,
+              Icons.badge_outlined,
+              Icons.badge_rounded,
+              'ID Card',
+            ),
+            _buildNavItem(
+              3,
+              Icons.person_outline_rounded,
+              Icons.person_rounded,
+              'Profile',
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
+  Widget _buildNavItem(
+    int index,
+    IconData icon,
+    IconData activeIcon,
+    String label,
+  ) {
     final bool isSelected = _selectedNavIndex == index;
     final Color activeColor = AppColors.deepAccent;
     final Color inactiveColor = AppColors.textGrey.withOpacity(0.5);
@@ -157,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                           color: activeColor.withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
-                        )
+                        ),
                       ]
                     : [],
               ),
@@ -191,7 +216,10 @@ class _HomePageState extends State<HomePage> {
       onRefresh: () async {
         await studentProvider.fetchStudentDetails();
         await studentProvider.fetchStudentStats();
-        await Provider.of<TournamentProvider>(context, listen: false).fetchTournaments();
+        await Provider.of<TournamentProvider>(
+          context,
+          listen: false,
+        ).fetchTournaments();
       },
       color: AppColors.deepAccent,
       backgroundColor: Colors.white,
@@ -202,22 +230,22 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildHeader(student, stats),
             Transform.translate(
-            offset: const Offset(0, 30),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _buildStatsRow(stats),
-                  const SizedBox(height: 24),
-                  _buildTournamentSection(student),
-                ],
+              offset: const Offset(0, 30),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildStatsRow(stats),
+                    const SizedBox(height: 24),
+                    _buildTournamentSection(student),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 40),
-        ],
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -234,8 +262,6 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Stack(
         children: [
-          // Custom Drawn Pattern Lines
-          //  Positioned.fill(child: CustomPaint(painter: HeaderPatternPainter())),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 75, 24, 20),
             child: Column(
@@ -576,13 +602,6 @@ class _HomePageState extends State<HomePage> {
             ),
             child: Stack(
               children: [
-                // Pattern Background
-                // Positioned.fill(
-                //   child: Opacity(
-                //     opacity: 0.1,
-                //     child: CustomPaint(painter: CardLinesPainter()),
-                //   ),
-                // ),
                 Padding(
                   padding: const EdgeInsets.all(18),
                   child: Column(

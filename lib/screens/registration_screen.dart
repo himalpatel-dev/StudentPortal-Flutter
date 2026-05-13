@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -5,8 +7,6 @@ import 'package:stradia_ace/providers/student_provider.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
-import 'dart:typed_data';
-import 'dart:math';
 import 'package:stradia_ace/utils/app_colors.dart';
 import 'package:stradia_ace/models/master.dart';
 import 'package:stradia_ace/models/student.dart';
@@ -303,6 +303,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  /*
   Future<void> _fillDemoData() async {
     final random = Random();
     final timestamp = DateTime.now().microsecondsSinceEpoch.toString();
@@ -479,6 +480,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
   }
+  */
 
   Future<void> _submitRegistration() async {
     final Map<String, dynamic> studentData = {
@@ -1244,6 +1246,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   const Spacer(),
 
+                  /*
                   if (widget.student == null)
                     InkWell(
                       onTap: _fillDemoData,
@@ -1266,6 +1269,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                     ),
+                  */
                   //const Spacer(),
                 ],
               ),
@@ -2431,10 +2435,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (widget.student == null) return false;
     return widget.student!.documents.any((doc) {
       final docName = doc.documentTypeName.toLowerCase();
-      if (type == 'identity')
+      if (type == 'identity') {
         return docName.contains('aadhar') ||
             docName.contains('id') ||
             docName.contains('identity');
+      }
       if (type == 'belt') return docName.contains('belt');
       if (type == 'medical') return docName.contains('medical');
       return !docName.contains('aadhar') &&

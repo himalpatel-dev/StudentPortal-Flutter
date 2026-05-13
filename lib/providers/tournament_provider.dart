@@ -47,7 +47,14 @@ class TournamentProvider with ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final studentId = prefs.getString('studentId') ?? '1';
+      final studentId = prefs.getString('studentId');
+
+      if (studentId == null) {
+        _errorMessage = 'Session expired. Please login again.';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       final token = prefs.getString('authToken');
 
@@ -148,7 +155,14 @@ class TournamentProvider with ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final studentId = prefs.getString('studentId') ?? '124';
+      final studentId = prefs.getString('studentId');
+
+      if (studentId == null) {
+        _errorMessage = 'Session expired. Please login again.';
+        _isFixtureLoading = false;
+        notifyListeners();
+        return null;
+      }
       final token = prefs.getString('authToken');
 
       final url = Uri.parse(
@@ -323,7 +337,7 @@ class TournamentProvider with ChangeNotifier {
         }
       }
     } catch (e) {
-      print('Error in findMatchingCategory: $e');
+      _errorMessage = 'Error in findMatchingCategory: $e';
     } finally {
       _isApplying = false;
       notifyListeners();
@@ -393,7 +407,14 @@ class TournamentProvider with ChangeNotifier {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final studentId = prefs.getString('studentId') ?? '469'; // Default for testing if needed
+      final studentId = prefs.getString('studentId');
+
+      if (studentId == null) {
+        _errorMessage = 'Session expired. Please login again.';
+        _isRecapLoading = false;
+        notifyListeners();
+        return;
+      }
       final token = prefs.getString('authToken');
 
       final url = Uri.parse(

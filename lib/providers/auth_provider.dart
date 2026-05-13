@@ -33,17 +33,9 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString('authToken', token);
 
           // Save student ID
-          final studentId = data['studentId'];
+          final studentId = data['studentId'] ?? data['id'];
           if (studentId != null) {
             await prefs.setString('studentId', studentId.toString());
-            debugPrint('Student ID saved: $studentId');
-          } else {
-            // Fallback for older API versions or if studentId is missing
-            final id = data['id'];
-            if (id != null) {
-              await prefs.setString('studentId', id.toString());
-              debugPrint('Student ID saved from id field: $id');
-            }
           }
         }
 

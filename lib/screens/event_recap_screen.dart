@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stradia_ace/providers/tournament_provider.dart';
@@ -52,7 +54,10 @@ class _EventRecapScreenState extends State<EventRecapScreen> {
         throw Exception('Could not launch $url');
       }
     } catch (e) {
-      debugPrint('Error launching URL: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not open link: $e')));
     }
   }
 
@@ -812,12 +817,13 @@ class _EventRecapScreenState extends State<EventRecapScreen> {
   }
 
   Widget _buildInitialsAvatar(String name, bool isWinner, Color color) {
-    if (name == 'N/A')
+    if (name == 'N/A') {
       return Icon(
         Icons.person_off_rounded,
         color: AppColors.textDisabled,
         size: 16,
       );
+    }
 
     final initials = name
         .trim()
