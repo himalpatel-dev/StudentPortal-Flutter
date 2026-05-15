@@ -1,1 +1,2 @@
+#include? "Pods/Target Support Files/Pods-Stradia Ace/Pods-Stradia Ace.release.xcconfig"
 #include "Generated.xcconfig"
