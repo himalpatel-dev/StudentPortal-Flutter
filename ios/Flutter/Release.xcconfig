@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 #include? "Pods/Target Support Files/Pods-Stradia Ace/Pods-Stradia Ace.release.xcconfig"
+=======
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+>>>>>>> 3f03f89 (First Commit Stradia Ace)
 #include "Generated.xcconfig"
