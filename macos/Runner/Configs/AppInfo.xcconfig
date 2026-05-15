@@ -8,7 +8,7 @@
 PRODUCT_NAME = Stradia Ace
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.responscity.stradiaace
+PRODUCT_BUNDLE_IDENTIFIER = com.responscity.stradiaAce
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.responscity. All rights reserved.
