@@ -26,6 +26,33 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Stradia Ace needs access to your camera to allow you to take and upload profile pictures.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Stradia Ace needs access to your microphone if you choose to record video for profile updates.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Stradia Ace needs access to your photo library to allow you to select and upload profile pictures.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -45,15 +72,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Stradia Ace needs access to your camera to allow you to take and upload profile pictures.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Stradia Ace needs access to your photo library to allow you to select and upload profile pictures.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Stradia Ace needs access to your microphone if you choose to record video for profile updates.</string>
 </dict>
 </plist>
