@@ -41,10 +41,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0B0E14),
-      body: Center(
+      body: SizedBox.expand(
         child: Lottie.asset(
           'assets/splash screen/Scene_cleaned.json',
-          fit: BoxFit.contain,
+          fit: BoxFit.cover,
           repeat: false,
           onLoaded: (composition) {
             Future.delayed(composition.duration, () {
